@@ -1,335 +1,221 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculated_Irradiation_Time.c - 代码查看与下载</title>
-    <!-- highlight.js 代码高亮 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C Files Viewer</title>
 
-        body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: #0d1117;
-            color: #c9d1d9;
-            line-height: 1.6;
-        }
+<style>
+    body{
+        font-family: Arial, sans-serif;
+        margin:0;
+        background:#f5f5f5;
+    }
 
-        /* 顶部工具栏 */
-        .toolbar {
-            position: sticky;
-            top: 0;
-            background: #161b22;
-            border-bottom: 1px solid #30363d;
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 16px;
-            z-index: 100;
-            backdrop-filter: blur(8px);
-        }
+    .login-box,
+    .main-box{
+        width:90%;
+        max-width:1000px;
+        margin:40px auto;
+        background:white;
+        padding:20px;
+        border-radius:10px;
+        box-shadow:0 0 10px rgba(0,0,0,0.1);
+    }
 
-        .file-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
+    h1{
+        text-align:center;
+    }
 
-        .file-icon {
-            font-size: 28px;
-        }
+    input{
+        width:100%;
+        padding:10px;
+        font-size:16px;
+        margin-top:10px;
+    }
 
-        .file-title {
-            font-size: 18px;
-            font-weight: 600;
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            background: #21262d;
-            padding: 6px 14px;
-            border-radius: 24px;
-            letter-spacing: 0.3px;
-        }
+    button{
+        margin-top:10px;
+        padding:10px 20px;
+        font-size:16px;
+        cursor:pointer;
+    }
 
-        .badge {
-            background: #238636;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
+    ul{
+        list-style:none;
+        padding:0;
+    }
 
-        .button-group {
-            display: flex;
-            gap: 12px;
-        }
+    li{
+        background:#eee;
+        margin:8px 0;
+        padding:10px;
+        border-radius:6px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+    }
 
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 20px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
-            text-decoration: none;
-        }
+    .btn-group button{
+        margin-left:10px;
+    }
 
-        .btn-primary {
-            background: #238636;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2ea043;
-            transform: translateY(-1px);
-        }
-
-        .btn-secondary {
-            background: #21262d;
-            color: #c9d1d9;
-            border: 1px solid #30363d;
-        }
-
-        .btn-secondary:hover {
-            background: #30363d;
-            border-color: #8b949e;
-        }
-
-        /* 代码容器 */
-        .code-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        .code-header {
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 12px 12px 0 0;
-            padding: 12px 20px;
-            font-family: monospace;
-            font-size: 13px;
-            color: #8b949e;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .line-count {
-            background: #21262d;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-        }
-
-        pre {
-            margin: 0;
-            padding: 0;
-            background: #0d1117;
-            border: 1px solid #30363d;
-            border-top: none;
-            border-radius: 0 0 12px 12px;
-            overflow-x: auto;
-        }
-
-        code {
-            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            padding: 20px;
-            display: block;
-        }
-
-        /* 加载和错误状态 */
-        .status-message {
-            text-align: center;
-            padding: 60px 20px;
-            background: #161b22;
-            border-radius: 12px;
-            border: 1px solid #30363d;
-        }
-
-        .loading {
-            color: #79c0ff;
-        }
-
-        .error {
-            color: #f85149;
-        }
-
-        /* 页脚 */
-        .footer {
-            text-align: center;
-            padding: 24px;
-            border-top: 1px solid #21262d;
-            margin-top: 40px;
-            font-size: 13px;
-            color: #8b949e;
-        }
-
-        a {
-            color: #58a6ff;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 640px) {
-            .toolbar {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .button-group {
-                width: 100%;
-            }
-            .btn {
-                flex: 1;
-                justify-content: center;
-            }
-            .code-container {
-                padding: 16px;
-            }
-            code {
-                font-size: 12px;
-                padding: 14px;
-            }
-        }
-    </style>
+    pre{
+        background:#222;
+        color:#00ff88;
+        padding:20px;
+        overflow:auto;
+        border-radius:10px;
+        max-height:600px;
+    }
+</style>
 </head>
 <body>
 
-<div class="toolbar">
-    <div class="file-info">
-        <span class="file-icon">📄</span>
-        <span class="file-title">Calculated_Irradiation_Time.c</span>
-        <span class="badge">C 语言</span>
-    </div>
-    <div class="button-group">
-        <button class="btn btn-secondary" id="copyBtn">📋 复制代码</button>
-        <button class="btn btn-primary" id="downloadBtn">⬇️ 下载文件</button>
-    </div>
+<div class="login-box" id="loginBox">
+    <h1>登录</h1>
+    <input type="password" id="password" placeholder="请输入密码">
+    <button onclick="login()">登录</button>
+    <p id="error" style="color:red;"></p>
 </div>
 
-<div class="code-container">
-    <div class="code-header">
-        <span>📁 Calculated_Irradiation_Time.c</span>
-        <span class="line-count" id="lineCount">行数: --</span>
-    </div>
-    <pre><code id="codeContent" class="language-c">加载中...</code></pre>
-</div>
+<div class="main-box" id="mainBox" style="display:none;">
+    <h1>C 文件查看器</h1>
 
-<div class="footer">
-    <span>🔗 原始文件来自 GitHub · </span>
-    <a href="#" id="rawLink" target="_blank">查看原始内容</a>
+    <ul id="fileList"></ul>
+
+    <h2>文件内容</h2>
+    <pre id="codeArea">点击文件查看内容...</pre>
 </div>
 
 <script>
-    // ==================== 请修改这里 ====================
-    // 替换成你的 GitHub raw 链接
-    const RAW_FILE_URL = "https://github.com/WangQiang-sys/code/blob/main/Calculated_Irradiation_Time.c";
-    // ==================================================
 
-    const codeElement = document.getElementById('codeContent');
-    const lineCountSpan = document.getElementById('lineCount');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const copyBtn = document.getElementById('copyBtn');
-    const rawLink = document.getElementById('rawLink');
+// =======================
+// 配置区域
+// =======================
 
-    // 设置原始链接
-    rawLink.href = RAW_FILE_URL;
+const PASSWORD = "12345678";
 
-    // 加载代码并高亮
-    async function loadAndDisplayCode() {
-        try {
-            codeElement.textContent = '正在加载代码...';
-            
-            const response = await fetch(RAW_FILE_URL);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const code = await response.text();
-            codeElement.textContent = code;
-            
-            // 统计行数（不包含末尾空行）
-            const lines = code.split('\n');
-            const nonEmptyLines = lines.filter(line => line.trim() !== '').length;
-            lineCountSpan.textContent = `总行数: ${lines.length} 行 (有效代码: ${nonEmptyLines} 行)`;
-            
-            // 重新应用高亮
-            delete codeElement.dataset.highlighted;
-            hljs.highlightElement(codeElement);
-            
-        } catch (error) {
-            console.error('加载失败:', error);
-            codeElement.textContent = `❌ 加载失败\n\n文件名: Calculated_Irradiation_Time.c\n错误信息: ${error.message}\n\n请检查:\n1. RAW_FILE_URL 是否正确\n2. 文件是否存在于仓库中\n3. 仓库是否为公开仓库`;
-            lineCountSpan.textContent = '加载失败';
-            codeElement.classList.add('error');
-        }
+// GitHub 仓库信息
+const githubUser = "WangQiang-sys";
+const repo = "code";
+const branch = "main";
+
+// 你的 .c 文件列表
+const files = [
+    "Calculated_Irradiation_Time.c",
+    "file2.c",
+    "file3.c",
+    "file4.c"
+];
+
+// =======================
+// 登录
+// =======================
+
+function login(){
+
+    const pwd = document.getElementById("password").value;
+
+    if(pwd === PASSWORD){
+
+        document.getElementById("loginBox").style.display = "none";
+        document.getElementById("mainBox").style.display = "block";
+
+        loadFileList();
+
+    }else{
+        document.getElementById("error").innerText = "密码错误";
     }
+}
 
-    // 下载文件
-    downloadBtn.addEventListener('click', () => {
-        // 方法1: 直接跳转到 raw 链接（浏览器会下载）
-        // window.location.href = RAW_FILE_URL;
-        
-        // 方法2: 更好的下载体验，保留原文件名
-        fetch(RAW_FILE_URL)
-            .then(res => res.blob())
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'Calculated_Irradiation_Time.c';  // 下载时的文件名
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            })
-            .catch(err => {
-                alert('下载失败: ' + err.message);
-            });
+// =======================
+// 加载文件列表
+// =======================
+
+function loadFileList(){
+
+    const ul = document.getElementById("fileList");
+
+    files.forEach(file => {
+
+        const li = document.createElement("li");
+
+        const span = document.createElement("span");
+        span.innerText = file;
+
+        const btnGroup = document.createElement("div");
+        btnGroup.className = "btn-group";
+
+        // 查看按钮
+        const viewBtn = document.createElement("button");
+        viewBtn.innerText = "查看";
+        viewBtn.onclick = () => viewFile(file);
+
+        // 下载按钮
+        const downloadBtn = document.createElement("button");
+        downloadBtn.innerText = "下载";
+        downloadBtn.onclick = () => downloadFile(file);
+
+        btnGroup.appendChild(viewBtn);
+        btnGroup.appendChild(downloadBtn);
+
+        li.appendChild(span);
+        li.appendChild(btnGroup);
+
+        ul.appendChild(li);
     });
+}
 
-    // 复制代码到剪贴板
-    copyBtn.addEventListener('click', async () => {
-        try {
-            // 获取纯文本代码（去掉高亮标签）
-            const rawCode = codeElement.textContent;
-            await navigator.clipboard.writeText(rawCode);
-            
-            // 临时改变按钮文字反馈
-            const originalText = copyBtn.innerHTML;
-            copyBtn.innerHTML = '✅ 已复制！';
-            copyBtn.style.background = '#238636';
-            setTimeout(() => {
-                copyBtn.innerHTML = originalText;
-                copyBtn.style.background = '';
-            }, 2000);
-        } catch (err) {
-            alert('复制失败，可以手动选择复制');
+// =======================
+// 查看文件
+// =======================
+
+async function viewFile(file){
+
+    const rawUrl =
+        `https://raw.githubusercontent.com/${githubUser}/${repo}/${branch}/${file}`;
+
+    try{
+
+        const response = await fetch(rawUrl);
+
+        if(!response.ok){
+            throw new Error("文件读取失败");
         }
-    });
 
-    // 页面加载时自动获取代码
-    loadAndDisplayCode();
+        const text = await response.text();
+
+        document.getElementById("codeArea").textContent = text;
+
+    }catch(err){
+
+        document.getElementById("codeArea").textContent =
+            "读取失败: " + err;
+    }
+}
+
+// =======================
+// 下载文件
+// =======================
+
+function downloadFile(file){
+
+    const rawUrl =
+        `https://raw.githubusercontent.com/${githubUser}/${repo}/${branch}/${file}`;
+
+    const a = document.createElement("a");
+
+    a.href = rawUrl;
+    a.download = file;
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    document.body.removeChild(a);
+}
+
 </script>
 
 </body>
