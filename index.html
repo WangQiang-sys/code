@@ -210,8 +210,8 @@ body{
 /* ================= CODE ================= */
 
 pre{
-    font-size:10px;
-    line-height:1.5;
+    font-size:8px;
+    line-height:1.0;
     border-radius:7px;
 }
 
@@ -650,9 +650,9 @@ document.addEventListener("mousemove", (e) => {
 
     let width = e.clientX;
 
-    if(width < 180) width = 180;
+    if(width < 100) width = 100;
 
-    if(width > 600) width = 600;
+    if(width > 900) width = 900;
 
     sidebar.style.width = width + "px";
 });
