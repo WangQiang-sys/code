@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protected Page</title>
+
+<style>
+/* =====================
+   基础设置
+===================== */
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f0f0f0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* =====================
+   密码输入框
+===================== */
+#password-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: 220px;
+    padding: 20px;
+
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+#password-input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 12px;
+
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+
+    background-color: #007bff;
+    color: #ffffff;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* =====================
+   受保护内容
+===================== */
+#protected-content {
+    display: none;
+
+    width: 90%;
+    max-width: 1200px;
+    min-width: 320px;
+
+    padding: 24px;
+
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+
+    align-items: flex-start;
+}
+
+/* =====================
+   排版
+===================== */
+h1 {
+    font-size: 1.6rem;
+    margin-bottom: 16px;
+}
+
+h2 {
+    font-size: 1.3rem;
+    margin-top: 24px;
+    margin-bottom: 10px;
+}
+
+h3 {
+    font-size: 1.1rem;
+    margin-top: 16px;
+    margin-bottom: 8px;
+}
+
+p {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-top: 12px;
+}
+
+ul {
+    list-style: none;
+    padding-left: 1em;
+}
+
+li {
+    font-size: 0.95rem;
+    margin: 6px 0;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* =====================
+   小屏适配（手机/窄窗口）
+===================== */
+@media (max-width: 768px) {
+    body {
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    #protected-content {
+        width: 100%;
+        padding: 16px;
+    }
+
+    h1 { font-size: 1.4rem; }
+    h2 { font-size: 1.2rem; }
+}
+
+/* =====================
+   大屏适配（2K/4K）
+===================== */
+@media (min-width: 1600px) {
+    html {
+        font-size: 18px;
+    }
+
+    #protected-content {
+        max-width: 1400px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- 密码输入 -->
+<div id="password-form">
+    <input type="password" id="password-input" placeholder="Enter password">
+    <button onclick="checkPassword()">Submit</button>
+</div>
+
+<!-- 受保护内容 -->
+<div id="protected-content">
+
+<h1>Table of Contents</h1>
+
+<h2>Chapter 1: 网站大全</h2>
+<ul>
+    <li>1. <a href="https://zhihuanli.github.io/Experimental-Data-Analysis-Course/" target="_blank">李志焕实验课</a></li>
+    <li>2. <a href="https://wuhongyi.cn/PKUXIADAQ/" target="_blank">XIA获取使用手册</a></li>
+    <li>3. <a href="https://www-nds.iaea.org/" target="_blank">IAEA官网</a></li>
+    <li>4. <a href="https://1936jy.mh.chaoxing.com/page/114506/show" target="_blank">中国原子能科学研究院图书馆</a></li>
+    <li>5. <a href="https://wwwndc.jaea.go.jp/NuC/" target="_blank">Tables of Nuclear Data</a></li>
+    <li>6. <a href="https://seafile.seaman.cloud/" target="_blank">CAEN seafile</a></li>
+</ul>
+
+   <h2>Chapter 2: WSL安装程序</h2>
+<ul>
+    <li>1. <a href="WSL安装程序/WSL-import-export.html" target="_blank">WSL import and export </a></li>
+    <li>2. <a href="WSL安装程序/jupyter-install.html" target="_blank">jupyter install</a></li>
+</ul>
+
+<h2>Chapter 3: 理论知识</h2>
+<ul>
+    <li>1. 实验和本底的时间分配 
+        <a href="理论知识/实验和本底的时间分配.pdf" target="_blank">理论计算</a>
+        <a href="理论知识/本底和实验时间分配模拟.html" target="_blank">程序模拟</a>
+    </li>
+    <li>2. <a href="理论知识/WaveformAnalysis.html" target="_blank">波形分析</a></li>
+    <li>3. <a href="理论知识/Distribution_of_time_intervals.html" target="_blank">相邻事件时间间隔分布</a></li>
+    <li>4. <a href="理论知识/Residual_plot.pdf" target="_blank">残差评估拟合结果</a></li>
+    <li>5. HPGe 刻度：
+        <a href="理论知识/HPGe_Calibration_method_1.pdf" target="_blank">方法一</a>
+        <a href="理论知识/HPGe_Calibration_method_2.pdf" target="_blank">方法二</a>
+        <a href="理论知识/HPGe_Energy_Calibration.html" target="_blank">能量</a>
+        <a href="理论知识/HPGe_resolution_ratio_calibration.html" target="_blank">分辨率</a>
+        <a href="理论知识/HpGe_peak_area_extraction.pdf" target="_blank">峰面积</a>
+    </li>
+</ul>
+
+<h2>Chapter 4: 计算程序</h2>
+<ul>
+    <li>1. <a href="https://radium.phys.uoa.gr/Javas/gamowin.html" target="_blank">伽莫夫窗口计算</a></li>
+    <li>2. <a href="计算程序/ReactionRateFormula.html" target="_blank">反应率计算公式</a></li>
+    <li>3. <a href="计算程序/Evaluation_of_gamma_counting_rate_in_activation_experiments.html" target="_blank">活化法辐照时间评估</a></li>
+    <li>4. <a href="计算程序/Energy_calculation_of_outgoing_particles.html" target="_blank">Q 方程计算</a></li>
+    <li>5. <a href="计算程序/LHENA_eff.c" target="_blank">LHENA_eff</a></li>
+</ul>
+
+<h2>Chapter 5: 3He 管测试结果</h2>
+<ul>
+    <!-- 后续补充 -->
+</ul>
+
+<h2>Chapter 6: LHENA 川大效率刻度</h2>
+<h3>Section 6.1: HPGe 端</h3>
+<ul>
+    <li>1. <a href="LHENA效率刻度/HPGe_Program.html" target="_blank">HPGe 程序合集</a></li>
+</ul>
+
+<p>End of protected content.</p>
+
+</div>
+
+<script>
+function checkPassword() {
+    const input = document.getElementById("password-input").value;
+    const correctPassword = "12345678"; // 修改为你的密码
+
+    if (input === correctPassword) {
+        document.getElementById("password-form").style.display = "none";
+        document.getElementById("protected-content").style.display = "block";
+    } else {
+        alert("Incorrect password");
+    }
+}
+</script>
+
+</body>
+</html>
