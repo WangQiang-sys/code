@@ -1,218 +1,335 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Protected Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculated_Irradiation_Time.c - 代码查看与下载</title>
+    <!-- highlight.js 代码高亮 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<style>
-/* =====================
-   基础设置
-===================== */
-* {
-    box-sizing: border-box;
-}
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.6;
+        }
 
-html {
-    font-size: 16px;
-}
+        /* 顶部工具栏 */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+        }
 
-body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #f0f0f0;
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+        .file-icon {
+            font-size: 28px;
+        }
 
-/* =====================
-   密码输入框
-===================== */
-#password-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+        .file-title {
+            font-size: 18px;
+            font-weight: 600;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            background: #21262d;
+            padding: 6px 14px;
+            border-radius: 24px;
+            letter-spacing: 0.3px;
+        }
 
-    width: 220px;
-    padding: 20px;
+        .badge {
+            background: #238636;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
 
-    background-color: #ffffff;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
+        .button-group {
+            display: flex;
+            gap: 12px;
+        }
 
-#password-input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 12px;
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            text-decoration: none;
+        }
 
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
+        .btn-primary {
+            background: #238636;
+            color: white;
+        }
 
-button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
+        .btn-primary:hover {
+            background: #2ea043;
+            transform: translateY(-1px);
+        }
 
-    background-color: #007bff;
-    color: #ffffff;
-    cursor: pointer;
-}
+        .btn-secondary {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+        }
 
-button:hover {
-    background-color: #0056b3;
-}
+        .btn-secondary:hover {
+            background: #30363d;
+            border-color: #8b949e;
+        }
 
-/* =====================
-   受保护内容
-===================== */
-#protected-content {
-    display: none;
+        /* 代码容器 */
+        .code-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
 
-    width: 90%;
-    max-width: 1200px;
-    min-width: 320px;
+        .code-header {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px 12px 0 0;
+            padding: 12px 20px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #8b949e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
 
-    padding: 24px;
+        .line-count {
+            background: #21262d;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
 
-    background-color: #ffffff;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        pre {
+            margin: 0;
+            padding: 0;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            overflow-x: auto;
+        }
 
-    align-items: flex-start;
-}
+        code {
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 20px;
+            display: block;
+        }
 
-/* =====================
-   排版
-===================== */
-h1 {
-    font-size: 1.6rem;
-    margin-bottom: 16px;
-}
+        /* 加载和错误状态 */
+        .status-message {
+            text-align: center;
+            padding: 60px 20px;
+            background: #161b22;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+        }
 
-h2 {
-    font-size: 1.3rem;
-    margin-top: 24px;
-    margin-bottom: 10px;
-}
+        .loading {
+            color: #79c0ff;
+        }
 
-h3 {
-    font-size: 1.1rem;
-    margin-top: 16px;
-    margin-bottom: 8px;
-}
+        .error {
+            color: #f85149;
+        }
 
-p {
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-top: 12px;
-}
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            border-top: 1px solid #21262d;
+            margin-top: 40px;
+            font-size: 13px;
+            color: #8b949e;
+        }
 
-ul {
-    list-style: none;
-    padding-left: 1em;
-}
+        a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
 
-li {
-    font-size: 0.95rem;
-    margin: 6px 0;
-}
+        a:hover {
+            text-decoration: underline;
+        }
 
-a {
-    color: #007bff;
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-/* =====================
-   小屏适配（手机/窄窗口）
-===================== */
-@media (max-width: 768px) {
-    body {
-        align-items: flex-start;
-        padding: 10px;
-    }
-
-    #protected-content {
-        width: 100%;
-        padding: 16px;
-    }
-
-    h1 { font-size: 1.4rem; }
-    h2 { font-size: 1.2rem; }
-}
-
-/* =====================
-   大屏适配（2K/4K）
-===================== */
-@media (min-width: 1600px) {
-    html {
-        font-size: 18px;
-    }
-
-    #protected-content {
-        max-width: 1400px;
-    }
-}
-</style>
+        @media (max-width: 640px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .button-group {
+                width: 100%;
+            }
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+            .code-container {
+                padding: 16px;
+            }
+            code {
+                font-size: 12px;
+                padding: 14px;
+            }
+        }
+    </style>
 </head>
-
 <body>
 
-<!-- 密码输入 -->
-<div id="password-form">
-    <input type="password" id="password-input" placeholder="Enter password">
-    <button onclick="checkPassword()">Submit</button>
+<div class="toolbar">
+    <div class="file-info">
+        <span class="file-icon">📄</span>
+        <span class="file-title">Calculated_Irradiation_Time.c</span>
+        <span class="badge">C 语言</span>
+    </div>
+    <div class="button-group">
+        <button class="btn btn-secondary" id="copyBtn">📋 复制代码</button>
+        <button class="btn btn-primary" id="downloadBtn">⬇️ 下载文件</button>
+    </div>
 </div>
 
-<!-- 受保护内容 -->
-<div id="protected-content">
+<div class="code-container">
+    <div class="code-header">
+        <span>📁 Calculated_Irradiation_Time.c</span>
+        <span class="line-count" id="lineCount">行数: --</span>
+    </div>
+    <pre><code id="codeContent" class="language-c">加载中...</code></pre>
+</div>
 
-<h1>Table of Contents</h1>
-
-<h2>Chapter 1: 网站大全</h2>
-<ul>
-    <li>1. <a href="https://zhihuanli.github.io/Experimental-Data-Analysis-Course/" target="_blank">李志焕实验课</a></li>
-    <li>2. <a href="https://wuhongyi.cn/PKUXIADAQ/" target="_blank">XIA获取使用手册</a></li>
-    <li>3. <a href="https://www-nds.iaea.org/" target="_blank">IAEA官网</a></li>
-    <li>4. <a href="https://1936jy.mh.chaoxing.com/page/114506/show" target="_blank">中国原子能科学研究院图书馆</a></li>
-    <li>5. <a href="https://wwwndc.jaea.go.jp/NuC/" target="_blank">Tables of Nuclear Data</a></li>
-    <li>6. <a href="https://seafile.seaman.cloud/" target="_blank">CAEN seafile</a></li>
-</ul>
-
-<h3>Chapter 2: 文件大全</h3>
-<ul>
-
-   <li>1. <a href="Calculated_Irradiation_Time.c" target="_blank">波形分析</a></li>
-</ul>
-   
-<p>辐照时间计算程序 - C语言源码</p>
-<p>End of protected content.</p>
-
+<div class="footer">
+    <span>🔗 原始文件来自 GitHub · </span>
+    <a href="#" id="rawLink" target="_blank">查看原始内容</a>
 </div>
 
 <script>
-function checkPassword() {
-    const input = document.getElementById("password-input").value;
-    const correctPassword = "12345678"; // 修改为你的密码
+    // ==================== 请修改这里 ====================
+    // 替换成你的 GitHub raw 链接
+    const RAW_FILE_URL = "https://raw.githubusercontent.com/你的用户名/你的仓库名/main/Calculated_Irradiation_Time.c";
+    // ==================================================
 
-    if (input === correctPassword) {
-        document.getElementById("password-form").style.display = "none";
-        document.getElementById("protected-content").style.display = "block";
-    } else {
-        alert("Incorrect password");
+    const codeElement = document.getElementById('codeContent');
+    const lineCountSpan = document.getElementById('lineCount');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const rawLink = document.getElementById('rawLink');
+
+    // 设置原始链接
+    rawLink.href = RAW_FILE_URL;
+
+    // 加载代码并高亮
+    async function loadAndDisplayCode() {
+        try {
+            codeElement.textContent = '正在加载代码...';
+            
+            const response = await fetch(RAW_FILE_URL);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const code = await response.text();
+            codeElement.textContent = code;
+            
+            // 统计行数（不包含末尾空行）
+            const lines = code.split('\n');
+            const nonEmptyLines = lines.filter(line => line.trim() !== '').length;
+            lineCountSpan.textContent = `总行数: ${lines.length} 行 (有效代码: ${nonEmptyLines} 行)`;
+            
+            // 重新应用高亮
+            delete codeElement.dataset.highlighted;
+            hljs.highlightElement(codeElement);
+            
+        } catch (error) {
+            console.error('加载失败:', error);
+            codeElement.textContent = `❌ 加载失败\n\n文件名: Calculated_Irradiation_Time.c\n错误信息: ${error.message}\n\n请检查:\n1. RAW_FILE_URL 是否正确\n2. 文件是否存在于仓库中\n3. 仓库是否为公开仓库`;
+            lineCountSpan.textContent = '加载失败';
+            codeElement.classList.add('error');
+        }
     }
-}
+
+    // 下载文件
+    downloadBtn.addEventListener('click', () => {
+        // 方法1: 直接跳转到 raw 链接（浏览器会下载）
+        // window.location.href = RAW_FILE_URL;
+        
+        // 方法2: 更好的下载体验，保留原文件名
+        fetch(RAW_FILE_URL)
+            .then(res => res.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Calculated_Irradiation_Time.c';  // 下载时的文件名
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(err => {
+                alert('下载失败: ' + err.message);
+            });
+    });
+
+    // 复制代码到剪贴板
+    copyBtn.addEventListener('click', async () => {
+        try {
+            // 获取纯文本代码（去掉高亮标签）
+            const rawCode = codeElement.textContent;
+            await navigator.clipboard.writeText(rawCode);
+            
+            // 临时改变按钮文字反馈
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '✅ 已复制！';
+            copyBtn.style.background = '#238636';
+            setTimeout(() => {
+                copyBtn.innerHTML = originalText;
+                copyBtn.style.background = '';
+            }, 2000);
+        } catch (err) {
+            alert('复制失败，可以手动选择复制');
+        }
+    });
+
+    // 页面加载时自动获取代码
+    loadAndDisplayCode();
 </script>
 
 </body>
