@@ -133,6 +133,8 @@ body{
 
 .sidebar{
     width:280px;
+    min-width:180px;
+    max-width:600px;
     background:#161b22;
     border-right:1px solid #30363d;
     overflow:auto;
@@ -151,6 +153,19 @@ body{
 
 .file-item.active{
     background:#30363d;
+}
+
+/* ================= RESIZER ================= */
+
+.resizer{
+    width:5px;
+    background:#30363d;
+    cursor:col-resize;
+    transition:0.2s;
+}
+
+.resizer:hover{
+    background:#58a6ff;
 }
 
 /* ================= CONTENT ================= */
@@ -190,6 +205,14 @@ body{
     flex:1;
     overflow:auto;
     padding:20px;
+}
+
+/* ================= CODE ================= */
+
+pre{
+    font-size:13px;
+    line-height:1.5;
+    border-radius:10px;
 }
 
 /* ================= MARKDOWN ================= */
@@ -319,7 +342,15 @@ body{
 
         <!-- sidebar -->
 
-        <div class="sidebar" id="fileList"></div>
+        <div class="sidebar">
+
+            <div id="fileList"></div>
+
+        </div>
+
+        <!-- resizer -->
+
+        <div class="resizer" id="resizer"></div>
 
         <!-- content -->
 
@@ -377,7 +408,6 @@ const REPO_NAME = "code";
 const BRANCH = "main";
 
 /* ================= FILES ================= */
-/* 手动添加你的文件 */
 
 const files = [
 
@@ -434,14 +464,10 @@ function initFiles(){
 
     renderFiles(allFiles);
 
-    const readme =
-        allFiles.find(f =>
-            f.name.toLowerCase() === "readme.md"
-        );
+    // 自动打开第一个文件
+    if(allFiles.length > 0){
 
-    if(readme){
-
-        openFile(readme);
+        openFile(allFiles[0]);
     }
 }
 
@@ -580,7 +606,6 @@ function downloadFile(){
 
             a.href = blobUrl;
 
-            // 当前文件名
             a.download =
                 document.getElementById("currentFile")
                 .innerText;
@@ -601,6 +626,43 @@ function toggleTheme(){
 
     document.body.classList.toggle("light");
 }
+
+/* ================= RESIZE ================= */
+
+const resizer =
+    document.getElementById("resizer");
+
+const sidebar =
+    document.querySelector(".sidebar");
+
+let isResizing = false;
+
+resizer.addEventListener("mousedown", () => {
+
+    isResizing = true;
+
+    document.body.style.cursor = "col-resize";
+});
+
+document.addEventListener("mousemove", (e) => {
+
+    if(!isResizing) return;
+
+    let width = e.clientX;
+
+    if(width < 180) width = 180;
+
+    if(width > 600) width = 600;
+
+    sidebar.style.width = width + "px";
+});
+
+document.addEventListener("mouseup", () => {
+
+    isResizing = false;
+
+    document.body.style.cursor = "default";
+});
 
 </script>
 
