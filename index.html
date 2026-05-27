@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>C Code Viewer</title>
+
+<link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet"/>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#0d1117;
+    color:#c9d1d9;
+    font-family:Consolas, monospace;
+    height:100vh;
+    overflow:hidden;
+}
+
+/* 登录 */
+
+#loginPage{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.login-box{
+    background:#161b22;
+    padding:40px;
+    border-radius:10px;
+    width:320px;
+}
+
+.login-box h1{
+    margin-bottom:20px;
+    text-align:center;
+}
+
+.login-box input{
+    width:100%;
+    padding:12px;
+    background:#0d1117;
+    border:1px solid #30363d;
+    color:white;
+    margin-bottom:15px;
+}
+
+.login-box button{
+    width:100%;
+    padding:12px;
+    background:#238636;
+    border:none;
+    color:white;
+    cursor:pointer;
+}
+
+/* 主界面 */
+
+#app{
+    display:none;
+    height:100vh;
+}
+
+/* 顶部 */
+
+.topbar{
+    height:50px;
+    background:#161b22;
+    display:flex;
+    align-items:center;
+    padding:0 20px;
+    border-bottom:1px solid #30363d;
+}
+
+.topbar h2{
+    margin-right:20px;
+}
+
+.search{
+    flex:1;
+}
+
+.search input{
+    width:100%;
+    padding:8px;
+    background:#0d1117;
+    border:1px solid #30363d;
+    color:white;
+}
+
+/* 主体 */
+
+.container{
+    display:flex;
+    height:calc(100vh - 50px);
+}
+
+/* 左侧 */
+
+.sidebar{
+    width:280px;
+    background:#161b22;
+    border-right:1px solid #30363d;
+    overflow:auto;
+}
+
+.file-item{
+    padding:12px 15px;
+    cursor:pointer;
+    border-bottom:1px solid #21262d;
+}
+
+.file-item:hover{
+    background:#21262d;
+}
+
+/* 右侧 */
+
+.main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+
+/* 文件头 */
+
+.file-header{
+    height:50px;
+    border-bottom:1px solid #30363d;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    background:#161b22;
+}
+
+.btns button{
+    margin-left:10px;
+    padding:8px 12px;
+    background:#238636;
+    border:none;
+    color:white;
+    cursor:pointer;
+}
+
+/* 内容 */
+
+.content{
+    flex:1;
+    overflow:auto;
+    padding:20px;
+}
+
+pre{
+    border-radius:10px;
+}
+
+/* markdown */
+
+.markdown{
+    line-height:1.8;
+}
+
+.markdown h1,
+.markdown h2{
+    margin-top:20px;
+}
+
+.markdown p{
+    margin:10px 0;
+}
+
+/* 手机 */
+
+@media(max-width:768px){
+
+    .sidebar{
+        width:180px;
+    }
+
+    .topbar h2{
+        display:none;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- 登录 -->
+
+<div id="loginPage">
+
+    <div class="login-box">
+
+        <h1>Login</h1>
+
+        <input type="password" id="password" placeholder="Password">
+
+        <button onclick="login()">Login</button>
+
+        <p id="error" style="color:red;margin-top:10px;"></p>
+
+    </div>
+
+</div>
+
+<!-- 主页面 -->
+
+<div id="app">
+
+    <div class="topbar">
+
+        <h2>Mini GitHub</h2>
+
+        <div class="search">
+            <input type="text" id="searchInput" placeholder="Search file..." onkeyup="filterFiles()">
+        </div>
+
+    </div>
+
+    <div class="container">
+
+        <!-- 左侧文件 -->
+
+        <div class="sidebar" id="fileList"></div>
+
+        <!-- 右侧 -->
+
+        <div class="main">
+
+            <div class="file-header">
+
+                <div id="currentFile">No file selected</div>
+
+                <div class="btns">
+
+                    <button onclick="copyCode()">Copy</button>
+
+                    <button onclick="downloadFile()">Download</button>
+
+                </div>
+
+            </div>
+
+            <div class="content">
+
+                <div id="viewer"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-c.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+
+// =======================
+// 配置
+// =======================
+
+const PASSWORD = "12345678";
+
+const GITHUB_USER = "你的用户名";
+const REPO_NAME = "你的仓库";
+const BRANCH = "main";
+
+// =======================
+
+let allFiles = [];
+let currentRawUrl = "";
+let currentText = "";
+
+// =======================
+// 登录
+// =======================
+
+function login(){
+
+    const pwd = document.getElementById("password").value;
+
+    if(pwd === PASSWORD){
+
+        document.getElementById("loginPage").style.display = "none";
+        document.getElementById("app").style.display = "block";
+
+        loadFiles();
+
+    }else{
+
+        document.getElementById("error").innerText = "Wrong Password";
+    }
+}
+
+// =======================
+// 加载文件
+// =======================
+
+async function loadFiles(){
+
+    const api =
+`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/`;
+
+    const response = await fetch(api);
+
+    const data = await response.json();
+
+    allFiles = data.filter(file => {
+
+        return file.name.endsWith(".c")
+            || file.name.endsWith(".h")
+            || file.name.endsWith(".md");
+
+    });
+
+    renderFiles(allFiles);
+
+    // 自动打开 README
+    const readme = allFiles.find(f => f.name.toLowerCase() === "readme.md");
+
+    if(readme){
+        openFile(readme);
+    }
+}
+
+// =======================
+// 渲染文件列表
+// =======================
+
+function renderFiles(files){
+
+    const list = document.getElementById("fileList");
+
+    list.innerHTML = "";
+
+    files.forEach(file => {
+
+        const div = document.createElement("div");
+
+        div.className = "file-item";
+
+        div.innerText = file.name;
+
+        div.onclick = () => openFile(file);
+
+        list.appendChild(div);
+    });
+}
+
+// =======================
+// 搜索
+// =======================
+
+function filterFiles(){
+
+    const key =
+        document.getElementById("searchInput")
+        .value
+        .toLowerCase();
+
+    const filtered = allFiles.filter(f =>
+        f.name.toLowerCase().includes(key)
+    );
+
+    renderFiles(filtered);
+}
+
+// =======================
+// 打开文件
+// =======================
+
+async function openFile(file){
+
+    document.getElementById("currentFile").innerText = file.name;
+
+    currentRawUrl = file.download_url;
+
+    const response = await fetch(file.download_url);
+
+    const text = await response.text();
+
+    currentText = text;
+
+    const viewer = document.getElementById("viewer");
+
+    // markdown
+    if(file.name.endsWith(".md")){
+
+        viewer.innerHTML =
+            `<div class="markdown">${marked.parse(text)}</div>`;
+    }
+
+    // c/h
+    else{
+
+        viewer.innerHTML =
+`
+<pre class="line-numbers">
+<code class="language-c">${escapeHtml(text)}</code>
+</pre>
+`;
+
+        Prism.highlightAll();
+    }
+}
+
+// =======================
+// HTML转义
+// =======================
+
+function escapeHtml(text){
+
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
+// =======================
+// 下载
+// =======================
+
+function downloadFile(){
+
+    if(!currentRawUrl) return;
+
+    const a = document.createElement("a");
+
+    a.href = currentRawUrl;
+
+    a.download = "";
+
+    a.click();
+}
+
+// =======================
+// 复制
+// =======================
+
+function copyCode(){
+
+    navigator.clipboard.writeText(currentText);
+
+    alert("Copied!");
+}
+
+</script>
+
+</body>
+</html>
