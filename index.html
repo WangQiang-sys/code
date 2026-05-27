@@ -381,15 +381,7 @@ const BRANCH = "main";
 
 const files = [
 
-    "README.md",
-
     "Calculated_Irradiation_Time.c",
-
-    "main.c",
-
-    "detector.c",
-
-    "physics.c",
 
     "test.h"
 
@@ -576,14 +568,31 @@ function downloadFile(){
 
     if(!currentRawUrl) return;
 
-    const a =
-        document.createElement("a");
+    fetch(currentRawUrl)
+        .then(response => response.blob())
+        .then(blob => {
 
-    a.href = currentRawUrl;
+            const blobUrl =
+                window.URL.createObjectURL(blob);
 
-    a.download = "";
+            const a =
+                document.createElement("a");
 
-    a.click();
+            a.href = blobUrl;
+
+            // 当前文件名
+            a.download =
+                document.getElementById("currentFile")
+                .innerText;
+
+            document.body.appendChild(a);
+
+            a.click();
+
+            a.remove();
+
+            window.URL.revokeObjectURL(blobUrl);
+        });
 }
 
 /* ================= THEME ================= */
