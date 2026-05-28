@@ -9,11 +9,7 @@
 <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet"/>
 
 <style>
-
-/* ================= 原CSS：完全不改（你直接用原来的） ================= */
-
 *{margin:0;padding:0;box-sizing:border-box;}
-
 body{
     background:#0d1117;
     color:#c9d1d9;
@@ -22,20 +18,19 @@ body{
     overflow:hidden;
 }
 
+/* ================= LOGIN ================= */
 #loginPage{
     display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
 }
-
 .login-box{
     width:320px;
     background:#161b22;
     padding:40px;
     border-radius:12px;
 }
-
 .login-box input{
     width:100%;
     padding:12px;
@@ -43,7 +38,6 @@ body{
     background:#0d1117;
     color:white;
 }
-
 .login-box button{
     width:100%;
     padding:12px;
@@ -53,8 +47,8 @@ body{
     cursor:pointer;
 }
 
+/* ================= APP ================= */
 #app{display:none;height:100vh;flex-direction:column;}
-
 .topbar{
     height:55px;
     background:#161b22;
@@ -63,286 +57,187 @@ body{
     padding:0 15px;
     gap:15px;
 }
+.topbar .logo{font-weight:bold;}
+.topbar input{flex:1;padding:10px;background:#0d1117;color:white;border:1px solid #30363d;border-radius:6px;}
+.topbar button{padding:8px 14px;border:none;background:#21262d;color:white;border-radius:6px;cursor:pointer;}
 
-.sidebar{
-    width:280px;
-    background:#161b22;
-    border-right:1px solid #30363d;
-    overflow:auto;
-}
-
-.file-item{
-    padding:12px;
-    cursor:pointer;
-}
-
+.container{display:flex;height:100%;overflow:hidden;}
+.sidebar{width:280px;background:#161b22;border-right:1px solid #30363d;overflow:auto;}
+.file-item{padding:12px;cursor:pointer;}
 .file-item:hover{background:#21262d;}
-
 .file-item.active{background:#30363d;}
 
-.container{display:flex;height:100%;}
+.resizer{width:5px;background:#30363d;cursor:col-resize;transition:0.2s;display:block;}
+.resizer:hover{background:#58a6ff;}
 
-.main{flex:1;display:flex;flex-direction:column;}
-
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.file-header{
+    height:55px;
+    background:#161b22;
+    border-bottom:1px solid #30363d;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+}
+.file-actions{display:flex;gap:10px;}
+.file-actions button{
+    padding:8px 12px;
+    border:none;
+    background:#238636;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+}
+.file-actions button:hover{background:#2ea043;}
 .content{flex:1;overflow:auto;padding:20px;}
-
 </style>
 </head>
 
 <body>
 
-<!-- ================= LOGIN（不动） ================= -->
+<!-- LOGIN -->
 <div id="loginPage">
     <div class="login-box">
         <h1>Mini GitHub</h1>
-
         <input type="password" id="password" placeholder="Password">
         <button onclick="login()">Login</button>
-
         <p id="error" style="color:red;margin-top:10px;"></p>
     </div>
 </div>
 
-<!-- ================= APP（不动结构） ================= -->
+<!-- APP -->
 <div id="app">
 
-<div class="topbar">
-    <div class="logo">Wang Qiang</div>
-
-    <input id="searchInput" placeholder="Search file..." onkeyup="filterFiles()">
-
-    <button onclick="toggleTheme()">Theme</button>
-</div>
-
-<div class="container">
-
-    <div class="sidebar">
-        <div id="fileList"></div>
+    <div class="topbar">
+        <div class="logo">Wang Qiang</div>
+        <input id="searchInput" placeholder="Search file..." onkeyup="filterFiles()">
+        <button onclick="toggleTheme()">Theme</button>
     </div>
 
-    <div class="main">
+    <div class="container">
 
-        <div class="content">
+        <div class="sidebar">
+            <div id="fileList"></div>
+        </div>
 
-            <div id="viewer"></div>
+        <div class="resizer" id="resizer"></div>
+
+        <div class="main">
+
+            <div class="file-header">
+                <div id="currentFile">Repository Overview</div>
+                <div class="file-actions">
+                    <button onclick="showHomePage()">Home</button>
+                    <button onclick="copyCode()">Copy</button>
+                    <button onclick="downloadFile()">Download</button>
+                </div>
+            </div>
+
+            <div class="content">
+                <div id="viewer"></div>
+            </div>
 
         </div>
 
     </div>
-
-</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script>
-
-/* ================= CONFIG ================= */
-
 const PASSWORD = "12345678";
 const GITHUB_USER = "WangQiang-sys";
 const REPO_NAME = "code";
 const BRANCH = "main";
 
-/* ================= FLAT FILES ================= */
-
 const files = [
-{
-    name:"Calculated_Irradiation_Time.c",
-    folder:"src",
-    type:"C Source",
-    modified:"2026-05-28",
-    version:"v2.3"
-},
-{
-    name:"test.h",
-    folder:"include",
-    type:"Header",
-    modified:"2026-05-25",
-    version:"v1.1"
-}
+    {name:"Calculated_Irradiation_Time.c", folder:"src", type:"C Source", modified:"2026-05-28", version:"v2.3"},
+    {name:"test.h", folder:"include", type:"Header", modified:"2026-05-25", version:"v1.1"}
 ];
-
-/* ================= STATE ================= */
 
 let folderState = {};
 let currentText = "";
 let currentRawUrl = "";
 
-/* ================= LOGIN（不动逻辑） ================= */
-
+/* ================= LOGIN ================= */
 function login(){
-
     const pwd = document.getElementById("password").value;
-
     if(pwd === PASSWORD){
-        document.getElementById("loginPage").style.display = "none";
-        document.getElementById("app").style.display = "flex";
-        initFiles();
-    } else {
-        document.getElementById("error").innerText = "Wrong Password";
+        document.getElementById("loginPage").style.display="none";
+        document.getElementById("app").style.display="flex";
+        showHomePage();
+    }else{
+        document.getElementById("error").innerText="Wrong Password";
     }
 }
 
-/* ================= INIT ================= */
-
-function initFiles(){
-    showHomePage();
-}
-
-/* ================= BUILD TREE ================= */
-
+/* ================= TREE BUILD ================= */
 function buildTree(){
-
     const map = {};
-
-    files.forEach(f => {
-
+    files.forEach(f=>{
         if(!map[f.folder]){
-            map[f.folder] = {
-                name: f.folder,
-                type: "folder",
-                children: []
-            };
+            map[f.folder]={name:f.folder,type:"folder",children:[]};
         }
-
         map[f.folder].children.push(f);
     });
-
     return Object.values(map);
 }
 
-/* ================= RENDER TREE（核心） ================= */
-
+/* ================= RENDER TREE ================= */
 function renderTree(tree, container){
-
-    container.innerHTML = "";
-
-    tree.forEach(item => {
-
-        if(item.type === "folder"){
-
-            const div = document.createElement("div");
-            div.className = "file-item";
-
+    container.innerHTML="";
+    tree.forEach(item=>{
+        if(item.type==="folder"){
+            const div=document.createElement("div");
+            div.className="file-item";
             const open = folderState[item.name];
-
-            div.innerHTML = open ? `📂 ${item.name}` : `📁 ${item.name}`;
-
-            div.onclick = () => {
-                folderState[item.name] = !folderState[item.name];
-                showHomePage();
-            };
-
+            div.innerHTML=open?`📂 ${item.name}`:`📁 ${item.name}`;
+            div.onclick=()=>{folderState[item.name]=!folderState[item.name];showHomePage();}
             container.appendChild(div);
-
             if(open){
-
-                const sub = document.createElement("div");
-                sub.style.paddingLeft = "18px";
-
-                renderTree(item.children, sub);
-
+                const sub=document.createElement("div");
+                sub.style.paddingLeft="18px";
+                renderTree(item.children,sub);
                 container.appendChild(sub);
             }
-        }
-
-        else{
-
-            const div = document.createElement("div");
-            div.className = "file-item";
-
-            div.innerHTML = `📄 ${item.name}`;
-
-            div.onclick = () => openFile(item);
-
+        }else{
+            const div=document.createElement("div");
+            div.className="file-item";
+            div.innerHTML=`📄 ${item.name}`;
+            div.onclick=()=>openFile(item);
             container.appendChild(div);
         }
     });
 }
 
 /* ================= HOME ================= */
-
 function showHomePage(){
-
-    document.getElementById("viewer").innerHTML = `
-        <h2>Repository Overview</h2>
-    `;
-
     const tree = buildTree();
-
-    renderTree(tree, document.getElementById("fileList"));
+    renderTree(tree,document.getElementById("fileList"));
+    // 初始不显示分割线
+    document.getElementById("currentFile").innerText="Repository Overview";
+    currentText="";
+    currentRawUrl="";
+    document.getElementById("viewer").innerHTML="";
 }
 
 /* ================= OPEN FILE ================= */
-
 async function openFile(file){
-
-    document.getElementById("viewer").innerHTML = "<h3>Loading...</h3>";
-
-    currentRawUrl =
-`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${file.name}`;
-
+    document.getElementById("currentFile").innerText=file.name;
+    currentRawUrl=`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${file.name}`;
+    document.getElementById("viewer").innerHTML="<h3>Loading...</h3>";
     try{
-
-        const res = await fetch(currentRawUrl);
-        const text = await res.text();
-
-        currentText = text;
-
-        document.getElementById("viewer").innerHTML = `
-<pre><code>${escapeHtml(text)}</code></pre>
-        `;
-
-    }catch(e){
-        document.getElementById("viewer").innerHTML = "Load Failed";
-    }
+        const res=await fetch(currentRawUrl);
+        const text=await res.text();
+        currentText=text;
+        document.getElementById("viewer").innerHTML=`<pre><code>${escapeHtml(text)}</code></pre>`;
+    }catch(e){document.getElementById("viewer").innerHTML="Load Failed";}
 }
 
-/* ================= ESCAPE ================= */
-
-function escapeHtml(t){
-    return t.replace(/&/g,"&amp;")
-            .replace(/</g,"&lt;")
-            .replace(/>/g,"&gt;");
-}
-
-/* ================= SEARCH ================= */
-
-function filterFiles(){
-
-    const key = document.getElementById("searchInput").value.toLowerCase();
-
-    const filtered = files.filter(f =>
-        f.name.toLowerCase().includes(key)
-    );
-
-    const map = {};
-
-    filtered.forEach(f => {
-
-        if(!map[f.folder]){
-            map[f.folder] = {
-                name: f.folder,
-                type: "folder",
-                children: []
-            };
-        }
-
-        map[f.folder].children.push(f);
-    });
-
-    renderTree(Object.values(map), document.getElementById("fileList"));
-}
-
-/* ================= THEME ================= */
-
-function toggleTheme(){
-    document.body.classList.toggle("light");
-}
-
-</script>
-
-</body>
-</html>
+function escapeHtml(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function copyCode(){if(!currentText){alert("No file opened");return;}navigator.clipboard.writeText(currentText);alert("Copied!");}
+function downloadFile(){if(!currentRawUrl){alert("No file opened");return;}fetch(currentRawUrl).then(r=>r.blob()).then(b=>{const url=URL.createObjectURL(b);const a=document.createElement("a");a.href=url;a.download=document.getElementById("currentFile").innerText;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);});}
+function toggleTheme(){document.body.classList.toggle("light");}
+function filterFiles(){const key=document.getElementById("searchInput").value.toLowerCase();const filtered=files.filter(f=>f.name.toLowerCase().includes(key));
