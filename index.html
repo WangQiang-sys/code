@@ -391,8 +391,8 @@ document.addEventListener("mousemove", (e) => {
     let newWidth = e.clientX - rect.left;
 
     // ✔ 更自由范围（几乎全屏）
-    const min = 120;
-    const max = rect.width - 120;
+    const min = 80;
+    const max = rect.width - 80;
 
     if (newWidth < min) newWidth = min;
     if (newWidth > max) newWidth = max;
