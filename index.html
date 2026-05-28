@@ -8,7 +8,11 @@
 <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet"/>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
 body{
     background:#0d1117;
@@ -49,6 +53,7 @@ body{
     background:#238636;
     color:white;
     border:none;
+    border-radius:6px;
     cursor:pointer;
 }
 
@@ -59,17 +64,21 @@ body{
     flex-direction:column;
 }
 
-/* TOP BAR */
+/* ===== TOPBAR ===== */
 .topbar{
     height:55px;
     background:#161b22;
     display:flex;
     align-items:center;
+    gap:12px;
     padding:0 15px;
-    gap:15px;
+    border-bottom:1px solid #30363d;
 }
 
-.topbar .logo{font-weight:bold;}
+.logo{
+    font-weight:bold;
+    white-space:nowrap;
+}
 
 .topbar input{
     flex:1;
@@ -83,31 +92,32 @@ body{
 .topbar button{
     padding:8px 14px;
     border:none;
-    background:#21262d;
+    background:#238636;
     color:white;
     border-radius:6px;
     cursor:pointer;
+    white-space:nowrap;
 }
 
 /* ===== LAYOUT ===== */
 .container{
     display:flex;
-    height:100%;
+    flex:1;
+    overflow:hidden;
 }
 
-/* LEFT SIDEBAR */
+/* ===== SIDEBAR ===== */
 .sidebar{
     width:120px;
     background:#161b22;
-    border-right:1px solid #30363d;
     overflow:auto;
 }
 
-/* DRAG BAR */
+/* ===== RESIZER ===== */
 .resizer{
     width:6px;
-    cursor:col-resize;
     background:#30363d;
+    cursor:col-resize;
     transition:0.2s;
 }
 
@@ -115,50 +125,30 @@ body{
     background:#238636;
 }
 
-/* ===== FILE ITEM（关键优化在这里） ===== */
+/* ===== FILE ITEM ===== */
 .file-item{
     padding:12px;
     cursor:pointer;
 
-    /* ⭐ 新增：防止撑爆 */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
-.file-item:hover{background:#21262d;}
-.file-item.active{background:#30363d;}
+.file-item:hover{
+    background:#21262d;
+}
 
-/* RIGHT PANEL */
+.file-item.active{
+    background:#30363d;
+}
+
+/* ===== MAIN ===== */
 .main{
     flex:1;
+    overflow:hidden;
     display:flex;
     flex-direction:column;
-    overflow:hidden;
-}
-
-.file-header{
-    height:55px;
-    background:#161b22;
-    border-bottom:1px solid #30363d;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:0 20px;
-}
-
-.file-actions{
-    display:flex;
-    gap:10px;
-}
-
-.file-actions button{
-    padding:8px 12px;
-    border:none;
-    background:#238636;
-    color:white;
-    border-radius:6px;
-    cursor:pointer;
 }
 
 .content{
@@ -179,9 +169,16 @@ pre{
 <!-- LOGIN -->
 <div id="loginPage">
     <div class="login-box">
-        <h1>Mini GitHub</h1>
-        <input type="password" id="password" placeholder="Password">
+        <h1 style="margin-bottom:20px;">Mini GitHub</h1>
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+        >
+
         <button onclick="login()">Login</button>
+
         <p id="error" style="color:red;margin-top:10px;"></p>
     </div>
 </div>
@@ -189,36 +186,45 @@ pre{
 <!-- APP -->
 <div id="app">
 
+    <!-- TOPBAR -->
     <div class="topbar">
+
         <div class="logo">Wang Qiang</div>
-        <input id="searchInput" placeholder="Search file..." onkeyup="filterFiles()">
+
+        <input
+            id="searchInput"
+            placeholder="Search file..."
+            onkeyup="filterFiles()"
+        >
+
         <button onclick="showHomePage()">Home</button>
+
+        <button onclick="copyCode()">Copy</button>
+
+        <button onclick="downloadFile()">Download</button>
+
     </div>
 
+    <!-- BODY -->
     <div class="container">
 
+        <!-- SIDEBAR -->
         <div class="sidebar" id="sidebar">
             <div id="fileList"></div>
         </div>
 
+        <!-- RESIZER -->
         <div class="resizer" id="resizer"></div>
 
+        <!-- MAIN -->
         <div class="main">
-
-            <div class="file-header">
-                <div id="currentFile">Repository Overview</div>
-                <div class="file-actions">
-                    <button onclick="copyCode()">Copy</button>
-                    <button onclick="downloadFile()">Download</button>
-                </div>
-            </div>
-
             <div class="content">
                 <div id="viewer"></div>
             </div>
-
         </div>
+
     </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
@@ -227,6 +233,7 @@ pre{
 <script>
 
 const PASSWORD = "12345678";
+
 const GITHUB_USER = "WangQiang-sys";
 const REPO_NAME = "code";
 const BRANCH = "main";
@@ -242,58 +249,93 @@ let currentRawUrl = "";
 
 /* ===== LOGIN ===== */
 function login(){
+
     const pwd = document.getElementById("password").value;
+
     if(pwd === PASSWORD){
-        document.getElementById("loginPage").style.display="none";
-        document.getElementById("app").style.display="flex";
+
+        document.getElementById("loginPage").style.display = "none";
+
+        document.getElementById("app").style.display = "flex";
+
         showHomePage();
+
     }else{
-        document.getElementById("error").innerText="Wrong Password";
+
+        document.getElementById("error").innerText = "Wrong Password";
     }
 }
 
 /* ===== TREE ===== */
 function buildTree(list = files){
+
     const map = {};
-    list.forEach(f=>{
+
+    list.forEach(f => {
+
         if(!map[f.folder]){
-            map[f.folder]={name:f.folder,type:"folder",children:[]};
+
+            map[f.folder] = {
+                name:f.folder,
+                type:"folder",
+                children:[]
+            };
         }
+
         map[f.folder].children.push(f);
     });
+
     return Object.values(map);
 }
 
 function renderTree(tree, container){
-    container.innerHTML="";
 
-    tree.forEach(item=>{
-        if(item.type==="folder"){
-            const div=document.createElement("div");
-            div.className="file-item";
+    container.innerHTML = "";
+
+    tree.forEach(item => {
+
+        if(item.type === "folder"){
+
+            const div = document.createElement("div");
+
+            div.className = "file-item";
 
             const open = folderState[item.name];
 
-            div.innerHTML=open?`📂 ${item.name}`:`📁 ${item.name}`;
+            div.innerHTML = open
+                ? `📂 ${item.name}`
+                : `📁 ${item.name}`;
 
-            div.onclick=()=>{
-                folderState[item.name]=!folderState[item.name];
+            div.onclick = () => {
+
+                folderState[item.name] = !folderState[item.name];
+
                 showHomePage();
             };
 
             container.appendChild(div);
 
             if(open){
-                const sub=document.createElement("div");
-                sub.style.paddingLeft="18px";
+
+                const sub = document.createElement("div");
+
+                sub.style.paddingLeft = "18px";
+
                 renderTree(item.children, sub);
+
                 container.appendChild(sub);
             }
-        } else {
-            const div=document.createElement("div");
-            div.className="file-item";
-            div.innerHTML=`📄 ${item.name}`;
-            div.onclick=()=>openFile(item);
+
+        }else{
+
+            const div = document.createElement("div");
+
+            div.className = "file-item";
+
+            div.innerHTML = `📄 ${item.name}`;
+
+            div.onclick = () => openFile(item);
+
             container.appendChild(div);
         }
     });
@@ -301,112 +343,161 @@ function renderTree(tree, container){
 
 /* ===== HOME ===== */
 function showHomePage(){
-    const tree = buildTree(files);
-    renderTree(tree, document.getElementById("fileList"));
 
-    document.getElementById("currentFile").innerText="Repository Overview";
-    document.getElementById("viewer").innerHTML="";
-    currentText="";
-    currentRawUrl="";
+    const tree = buildTree(files);
+
+    renderTree(
+        tree,
+        document.getElementById("fileList")
+    );
+
+    document.getElementById("viewer").innerHTML = "";
+
+    currentText = "";
+
+    currentRawUrl = "";
 }
 
 /* ===== OPEN FILE ===== */
 async function openFile(file){
 
-    document.getElementById("currentFile").innerText=file.name;
-
-    currentRawUrl=
+    currentRawUrl =
 `https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${file.folder}/${file.name}`;
 
-    document.getElementById("viewer").innerHTML="Loading...";
+    document.getElementById("viewer").innerHTML = "Loading...";
 
     try{
-        const res=await fetch(currentRawUrl);
-        const text=await res.text();
 
-        currentText=text;
+        const res = await fetch(currentRawUrl);
 
-        document.getElementById("viewer").innerHTML=
+        const text = await res.text();
+
+        currentText = text;
+
+        document.getElementById("viewer").innerHTML =
 `<pre><code class="language-c">${escapeHtml(text)}</code></pre>`;
 
         Prism.highlightAll();
 
     }catch(e){
-        document.getElementById("viewer").innerHTML="Load Failed";
+
+        document.getElementById("viewer").innerHTML = "Load Failed";
     }
 }
 
 /* ===== SEARCH ===== */
 function filterFiles(){
-    const key=document.getElementById("searchInput").value.toLowerCase();
-    const filtered=files.filter(f=>f.name.toLowerCase().includes(key));
-    const tree=buildTree(filtered);
-    renderTree(tree, document.getElementById("fileList"));
+
+    const key =
+        document.getElementById("searchInput")
+        .value
+        .toLowerCase();
+
+    const filtered = files.filter(f =>
+        f.name.toLowerCase().includes(key)
+    );
+
+    const tree = buildTree(filtered);
+
+    renderTree(
+        tree,
+        document.getElementById("fileList")
+    );
 }
 
 /* ===== COPY ===== */
 function copyCode(){
-    if(!currentText) return alert("No file opened");
+
+    if(!currentText)
+        return alert("No file opened");
+
     navigator.clipboard.writeText(currentText);
+
     alert("Copied!");
 }
 
 /* ===== DOWNLOAD ===== */
 function downloadFile(){
-    if(!currentRawUrl) return alert("No file opened");
+
+    if(!currentRawUrl)
+        return alert("No file opened");
 
     fetch(currentRawUrl)
-        .then(r=>r.blob())
-        .then(blob=>{
-            const url=URL.createObjectURL(blob);
-            const a=document.createElement("a");
-            a.href=url;
-            a.download=document.getElementById("currentFile").innerText;
+        .then(r => r.blob())
+        .then(blob => {
+
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+
+            a.href = url;
+
+            a.download = "file";
+
             document.body.appendChild(a);
+
             a.click();
+
             a.remove();
+
             URL.revokeObjectURL(url);
         });
 }
 
-/* ===== UTIL ===== */
+/* ===== HTML ESCAPE ===== */
 function escapeHtml(t){
-    return t.replace(/&/g,"&amp;")
-            .replace(/</g,"&lt;")
-            .replace(/>/g,"&gt;");
+
+    return t
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;");
 }
 
-/* ===== FULL RANGE RESIZER ===== */
+/* ===== RESIZER ===== */
 const sidebar = document.getElementById("sidebar");
+
 const resizer = document.getElementById("resizer");
+
 const container = document.querySelector(".container");
 
 let isDragging = false;
 
 resizer.addEventListener("mousedown", () => {
+
     isDragging = true;
+
     document.body.style.cursor = "col-resize";
+
     document.body.style.userSelect = "none";
 });
 
 document.addEventListener("mousemove", (e) => {
-    if (!isDragging) return;
+
+    if(!isDragging) return;
 
     const rect = container.getBoundingClientRect();
+
     let newWidth = e.clientX - rect.left;
 
     const min = 80;
+
     const max = rect.width - 80;
 
-    if (newWidth < min) newWidth = min;
-    if (newWidth > max) newWidth = max;
+    if(newWidth < min)
+        newWidth = min;
+
+    if(newWidth > max)
+        newWidth = max;
 
     sidebar.style.width = newWidth + "px";
 });
 
 document.addEventListener("mouseup", () => {
+
     isDragging = false;
+
     document.body.style.cursor = "default";
+
     document.body.style.userSelect = "auto";
 });
 
