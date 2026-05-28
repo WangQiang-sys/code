@@ -138,6 +138,8 @@ body{
     background:#161b22;
     border-right:1px solid #30363d;
     overflow:auto;
+
+    display:none;
 }
 
 .file-item{
@@ -161,6 +163,8 @@ body{
     background:#30363d;
     cursor:col-resize;
     transition:0.2s;
+
+    display:none;
 }
 
 .resizer:hover{
@@ -204,6 +208,7 @@ body{
     flex:1;
     overflow:auto;
     padding:20px;
+    width:100%;
 }
 
 /* ================= CODE ================= */
@@ -225,13 +230,9 @@ pre{
     display:flex;
     align-items:center;
     justify-content:space-between;
-
     padding:14px 18px;
-
     transition:0.2s;
-
     cursor:pointer;
-
     border-radius:8px;
 }
 
@@ -243,7 +244,6 @@ pre{
     display:flex;
     align-items:center;
     gap:12px;
-
     font-size:15px;
 }
 
@@ -259,7 +259,6 @@ pre{
     display:flex;
     align-items:center;
     gap:35px;
-
     font-size:13px;
     color:#8b949e;
 }
@@ -439,7 +438,7 @@ pre{
 
             </div>
 
-            <div class="content">
+            <div class="content" id="mainContent">
 
                 <div id="viewer"></div>
 
@@ -548,6 +547,12 @@ function initFiles(){
 /* ================= HOMEPAGE ================= */
 
 function showHomePage(){
+
+    document.querySelector(".sidebar")
+        .style.display = "none";
+
+    document.querySelector(".resizer")
+        .style.display = "none";
 
     document.getElementById("currentFile")
         .innerText = "Repository Overview";
@@ -678,6 +683,12 @@ function openFileByName(name){
 /* ================= OPEN FILE ================= */
 
 async function openFile(file){
+
+    document.querySelector(".sidebar")
+        .style.display = "block";
+
+    document.querySelector(".resizer")
+        .style.display = "block";
 
     document.getElementById("currentFile")
         .innerText = file.name;
