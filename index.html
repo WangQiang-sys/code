@@ -1,16 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Mini GitHub Viewer</title>
 
-<link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css"
-      rel="stylesheet"/>
+<!-- Prism -->
+<link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet"/>
 
 <style>
 
@@ -28,7 +25,7 @@ body{
     overflow:hidden;
 }
 
-/* LOGIN */
+/* ================= LOGIN ================= */
 
 #loginPage{
     display:flex;
@@ -42,6 +39,7 @@ body{
     background:#161b22;
     padding:40px;
     border-radius:12px;
+    box-shadow:0 0 20px rgba(0,0,0,0.5);
 }
 
 .login-box h1{
@@ -53,9 +51,11 @@ body{
     width:100%;
     padding:12px;
     margin-bottom:15px;
+    border:none;
+    outline:none;
     background:#0d1117;
-    border:1px solid #30363d;
     color:white;
+    border:1px solid #30363d;
     border-radius:6px;
 }
 
@@ -67,9 +67,14 @@ body{
     color:white;
     border-radius:6px;
     cursor:pointer;
+    font-size:16px;
 }
 
-/* APP */
+.login-box button:hover{
+    background:#2ea043;
+}
+
+/* ================= APP ================= */
 
 #app{
     display:none;
@@ -77,7 +82,7 @@ body{
     flex-direction:column;
 }
 
-/* TOPBAR */
+/* ================= TOPBAR ================= */
 
 .topbar{
     height:55px;
@@ -116,7 +121,7 @@ body{
     cursor:pointer;
 }
 
-/* MAIN */
+/* ================= MAIN ================= */
 
 .container{
     flex:1;
@@ -124,24 +129,28 @@ body{
     overflow:hidden;
 }
 
-/* SIDEBAR */
+/* ================= SIDEBAR ================= */
 
 .sidebar{
-    width:300px;
+    width:280px;
+    min-width:180px;
+    max-width:600px;
     background:#161b22;
     border-right:1px solid #30363d;
     overflow:auto;
+
+    display:none;
 }
 
 .folder-title{
-    padding:12px;
+    padding:10px 15px;
     font-weight:bold;
     color:#58a6ff;
     border-bottom:1px solid #30363d;
 }
 
 .file-item{
-    padding:10px 10px 10px 30px;
+    padding:12px 15px 12px 35px;
     cursor:pointer;
     transition:0.2s;
 }
@@ -154,15 +163,22 @@ body{
     background:#30363d;
 }
 
-/* RESIZER */
+/* ================= RESIZER ================= */
 
 .resizer{
     width:5px;
     background:#30363d;
     cursor:col-resize;
+    transition:0.2s;
+
+    display:none;
 }
 
-/* CONTENT */
+.resizer:hover{
+    background:#58a6ff;
+}
+
+/* ================= CONTENT ================= */
 
 .main{
     flex:1;
@@ -195,29 +211,89 @@ body{
     cursor:pointer;
 }
 
+.file-actions button:hover{
+    background:#2ea043;
+}
+
 .content{
     flex:1;
     overflow:auto;
     padding:20px;
+    width:100%;
 }
 
-/* CODE */
+/* ================= CODE ================= */
 
 pre{
-    border-radius:8px;
-    overflow:auto;
     font-size:14px;
+    line-height:1.5;
+    border-radius:7px;
+    overflow:auto;
 }
 
+/* ================= REPOSITORY LIST ================= */
+
+.repo-list{
+    margin-top:20px;
+}
+
+.repo-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 18px;
+    transition:0.2s;
+    cursor:pointer;
+    border-radius:8px;
+}
+
+.repo-row:hover{
+    background:#161b22;
+}
+
+.repo-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:15px;
+}
+
+.repo-icon{
+    font-size:18px;
+}
+
+.repo-name{
+    color:#58a6ff;
+}
+
+.repo-right{
+    display:flex;
+    align-items:center;
+    gap:35px;
+    font-size:13px;
+    color:#8b949e;
+}
+
+/* ================= MARKDOWN ================= */
+
 .markdown{
+    max-width:1200px;
+    line-height:1.8;
+}
+
+.markdown h1{
+    margin-bottom:10px;
+}
+
+.markdown p{
     margin-bottom:20px;
 }
 
-/* LIGHT MODE */
+/* ================= LIGHT MODE ================= */
 
 .light{
-    background:white;
-    color:black;
+    background:#ffffff;
+    color:#111;
 }
 
 .light .topbar,
@@ -225,10 +301,11 @@ pre{
 .light .file-header,
 .light .login-box{
     background:#f5f5f5;
-    color:black;
+    color:#111;
 }
 
-.light input{
+.light .search input,
+.light .login-box input{
     background:white;
     color:black;
 }
@@ -241,13 +318,41 @@ pre{
     background:#dcdcdc;
 }
 
-</style>
+.light .repo-row:hover{
+    background:#f0f0f0;
+}
 
+/* ================= MOBILE ================= */
+
+@media(max-width:768px){
+
+    .sidebar{
+        width:180px;
+    }
+
+    .logo{
+        display:none;
+    }
+
+    .repo-right{
+        gap:15px;
+        font-size:11px;
+    }
+
+    .file-header{
+        flex-direction:column;
+        height:auto;
+        padding:10px;
+        gap:10px;
+    }
+}
+
+</style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
+<!-- ================= LOGIN ================= -->
 
 <div id="loginPage">
 
@@ -255,9 +360,11 @@ pre{
 
         <h1>Mini GitHub</h1>
 
-        <input type="password"
-               id="password"
-               placeholder="Password">
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+        >
 
         <button onclick="login()">
             Login
@@ -271,7 +378,7 @@ pre{
 
 </div>
 
-<!-- APP -->
+<!-- ================= APP ================= -->
 
 <div id="app">
 
@@ -285,10 +392,12 @@ pre{
 
         <div class="search">
 
-            <input type="text"
-                   id="searchInput"
-                   placeholder="Search file..."
-                   onkeyup="filterFiles()">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search file..."
+                onkeyup="filterFiles()"
+            >
 
         </div>
 
@@ -316,7 +425,7 @@ pre{
         <div class="resizer"
              id="resizer"></div>
 
-        <!-- MAIN CONTENT -->
+        <!-- CONTENT -->
 
         <div class="main">
 
@@ -327,6 +436,10 @@ pre{
                 </div>
 
                 <div class="file-actions">
+
+                    <button onclick="showHomePage()">
+                        Home
+                    </button>
 
                     <button onclick="copyCode()">
                         Copy
@@ -364,7 +477,7 @@ pre{
 
 <script>
 
-/* CONFIG */
+/* ================= CONFIG ================= */
 
 const PASSWORD = "12345678";
 
@@ -374,12 +487,13 @@ const REPO_NAME = "code";
 
 const BRANCH = "main";
 
-/* FILES */
+/* ================= FILES ================= */
 
 const files = [
 
 {
     name:"Calculated_Irradiation_Time.c",
+    folder:"src",
     type:"C Source",
     modified:"2026-05-28",
     version:"v2.3"
@@ -387,13 +501,14 @@ const files = [
 
 {
     name:"test.h",
+    folder:"include",
     type:"Header",
     modified:"2026-05-25",
     version:"v1.1"
 },
 
 {
-    name:"r.c",
+    name:"HPGe.c",
     folder:"HPGe",
     type:"C Source",
     modified:"2026-05-28",
@@ -402,7 +517,7 @@ const files = [
 
 ];
 
-/* GLOBAL */
+/* ================= GLOBAL ================= */
 
 let allFiles = [];
 
@@ -410,7 +525,7 @@ let currentText = "";
 
 let currentRawUrl = "";
 
-/* LOGIN */
+/* ================= LOGIN ================= */
 
 function login(){
 
@@ -434,7 +549,7 @@ function login(){
     }
 }
 
-/* INIT */
+/* ================= INIT FILES ================= */
 
 function initFiles(){
 
@@ -452,23 +567,80 @@ function initFiles(){
     showHomePage();
 }
 
-/* HOMEPAGE */
+/* ================= HOMEPAGE ================= */
 
 function showHomePage(){
+
+    document.querySelectorAll(".file-item")
+        .forEach(x =>
+            x.classList.remove("active"));
+
+    document.querySelector(".sidebar")
+        .style.display = "none";
+
+    document.querySelector(".resizer")
+        .style.display = "none";
 
     document.getElementById("currentFile")
         .innerText = "Repository Overview";
 
-    document.getElementById("viewer")
-        .innerHTML = `
-        <div class="markdown">
-            <h1>Mini GitHub Viewer</h1>
-            <p>Select files from the sidebar.</p>
+    currentText = "";
+
+    currentRawUrl = "";
+
+    const viewer =
+        document.getElementById("viewer");
+
+    viewer.innerHTML = `
+
+    <div class="markdown">
+
+        <div class="repo-list">
+
+            ${allFiles.map(file => `
+
+            <div class="repo-row"
+                 onclick="openFileByName('${file.name}')">
+
+                <div class="repo-left">
+
+                    <span class="repo-icon">
+                        📄
+                    </span>
+
+                    <span class="repo-name">
+                        ${file.folder}/${file.name}
+                    </span>
+
+                </div>
+
+                <div class="repo-right">
+
+                    <span>
+                        ${file.type}
+                    </span>
+
+                    <span>
+                        ${file.modified}
+                    </span>
+
+                    <span>
+                        ${file.version}
+                    </span>
+
+                </div>
+
+            </div>
+
+            `).join("")}
+
         </div>
+
+    </div>
     `;
 }
 
-/* RENDER FILES */
+/* ================= RENDER FILES ================= */
 
 function renderFiles(files){
 
@@ -491,16 +663,16 @@ function renderFiles(files){
 
     for(const folder in folders){
 
-        const folderTitle =
+        const folderDiv =
             document.createElement("div");
 
-        folderTitle.className =
-            "folder-title";
+        folderDiv.className = "folder-title";
 
-        folderTitle.innerHTML =
-            `📁 ${folder}`;
+        folderDiv.innerHTML = `
+            📁 ${folder}
+        `;
 
-        list.appendChild(folderTitle);
+        list.appendChild(folderDiv);
 
         folders[folder].forEach(file => {
 
@@ -509,8 +681,9 @@ function renderFiles(files){
 
             div.className = "file-item";
 
-            div.innerHTML =
-                `📄 ${file.name}`;
+            div.innerHTML = `
+                📄 ${file.name}
+            `;
 
             div.onclick = () => {
 
@@ -528,7 +701,7 @@ function renderFiles(files){
     }
 }
 
-/* SEARCH */
+/* ================= SEARCH ================= */
 
 function filterFiles(){
 
@@ -545,15 +718,33 @@ function filterFiles(){
     renderFiles(filtered);
 }
 
-/* OPEN FILE */
+/* ================= OPEN BY NAME ================= */
+
+function openFileByName(name){
+
+    const file =
+        allFiles.find(f => f.name === name);
+
+    if(file){
+
+        openFile(file);
+    }
+}
+
+/* ================= OPEN FILE ================= */
 
 async function openFile(file){
+
+    document.querySelector(".sidebar")
+        .style.display = "block";
+
+    document.querySelector(".resizer")
+        .style.display = "block";
 
     document.getElementById("currentFile")
         .innerText = file.name;
 
-    currentRawUrl =
-        file.download_url;
+    currentRawUrl = file.download_url;
 
     try{
 
@@ -568,13 +759,12 @@ async function openFile(file){
         const viewer =
             document.getElementById("viewer");
 
-        if(file.name.endsWith(".md")){
+        if(file.name.toLowerCase().endsWith(".md")){
 
-            viewer.innerHTML = `
-                <div class="markdown">
+            viewer.innerHTML =
+                `<div class="markdown">
                     ${marked.parse(text)}
-                </div>
-            `;
+                </div>`;
         }
 
         else{
@@ -583,15 +773,23 @@ async function openFile(file){
 
 <div class="markdown">
 
-<h2>${file.name}</h2>
+    <h2>${file.name}</h2>
 
-<p>Folder: ${file.folder}</p>
+    <p>
+        Folder: ${file.folder}
+    </p>
 
-<p>Type: ${file.type}</p>
+    <p>
+        Modified: ${file.modified}
+    </p>
 
-<p>Modified: ${file.modified}</p>
+    <p>
+        Type: ${file.type}
+    </p>
 
-<p>Version: ${file.version}</p>
+    <p>
+        Version: ${file.version}
+    </p>
 
 </div>
 
@@ -614,17 +812,17 @@ ${escapeHtml(text)}
     }
 }
 
-/* ESCAPE HTML */
+/* ================= ESCAPE HTML ================= */
 
 function escapeHtml(text){
 
     return text
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;");
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
 }
 
-/* COPY */
+/* ================= COPY ================= */
 
 function copyCode(){
 
@@ -635,13 +833,12 @@ function copyCode(){
         return;
     }
 
-    navigator.clipboard
-        .writeText(currentText);
+    navigator.clipboard.writeText(currentText);
 
     alert("Copied!");
 }
 
-/* DOWNLOAD */
+/* ================= DOWNLOAD ================= */
 
 function downloadFile(){
 
@@ -653,36 +850,39 @@ function downloadFile(){
     }
 
     fetch(currentRawUrl)
-        .then(r => r.blob())
+        .then(response => response.blob())
         .then(blob => {
 
-            const url =
-                URL.createObjectURL(blob);
+            const blobUrl =
+                window.URL.createObjectURL(blob);
 
             const a =
                 document.createElement("a");
 
-            a.href = url;
+            a.href = blobUrl;
 
             a.download =
                 document.getElementById("currentFile")
                 .innerText;
 
+            document.body.appendChild(a);
+
             a.click();
 
-            URL.revokeObjectURL(url);
+            a.remove();
+
+            window.URL.revokeObjectURL(blobUrl);
         });
 }
 
-/* THEME */
+/* ================= THEME ================= */
 
 function toggleTheme(){
 
-    document.body
-        .classList.toggle("light");
+    document.body.classList.toggle("light");
 }
 
-/* RESIZER */
+/* ================= RESIZE ================= */
 
 const resizer =
     document.getElementById("resizer");
@@ -696,30 +896,27 @@ resizer.addEventListener("mousedown", () => {
 
     isResizing = true;
 
-    document.body.style.cursor =
-        "col-resize";
+    document.body.style.cursor = "col-resize";
 });
 
-document.addEventListener("mousemove", e => {
+document.addEventListener("mousemove", (e) => {
 
     if(!isResizing) return;
 
     let width = e.clientX;
 
-    if(width < 180) width = 180;
+    if(width < 100) width = 100;
 
-    if(width > 800) width = 800;
+    if(width > 900) width = 900;
 
-    sidebar.style.width =
-        width + "px";
+    sidebar.style.width = width + "px";
 });
 
 document.addEventListener("mouseup", () => {
 
     isResizing = false;
 
-    document.body.style.cursor =
-        "default";
+    document.body.style.cursor = "default";
 });
 
 </script>
