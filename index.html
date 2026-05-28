@@ -59,7 +59,6 @@ body{
     padding:0 15px;
     gap:15px;
 }
-
 .topbar .logo{font-weight:bold;}
 
 .topbar input{
@@ -70,7 +69,6 @@ body{
     border:1px solid #30363d;
     border-radius:6px;
 }
-
 .topbar button{
     padding:8px 14px;
     border:none;
@@ -80,16 +78,28 @@ body{
     cursor:pointer;
 }
 
+/* ===== LAYOUT ===== */
 .container{
     display:flex;
     height:100%;
 }
 
+/* sidebar */
 .sidebar{
     width:280px;
     background:#161b22;
     border-right:1px solid #30363d;
     overflow:auto;
+}
+
+/* 🔥 resizer */
+.resizer{
+    width:5px;
+    cursor:col-resize;
+    background:#30363d;
+}
+.resizer:hover{
+    background:#238636;
 }
 
 .file-item{
@@ -99,6 +109,7 @@ body{
 .file-item:hover{background:#21262d;}
 .file-item.active{background:#30363d;}
 
+/* main */
 .main{
     flex:1;
     display:flex;
@@ -166,9 +177,11 @@ pre{
 
     <div class="container">
 
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <div id="fileList"></div>
         </div>
+
+        <div class="resizer" id="resizer"></div>
 
         <div class="main">
 
@@ -231,15 +244,11 @@ function buildTree(list = files){
     return Object.values(map);
 }
 
-/* folder-first + file-second */
 function renderTree(tree, container){
-
     container.innerHTML="";
 
     tree.forEach(item=>{
-
         if(item.type==="folder"){
-
             const div=document.createElement("div");
             div.className="file-item";
 
@@ -260,9 +269,7 @@ function renderTree(tree, container){
                 renderTree(item.children, sub);
                 container.appendChild(sub);
             }
-        }
-
-        else{
+        } else {
             const div=document.createElement("div");
             div.className="file-item";
             div.innerHTML=`📄 ${item.name}`;
@@ -311,13 +318,9 @@ async function openFile(file){
 
 /* ================= SEARCH ================= */
 function filterFiles(){
-
     const key=document.getElementById("searchInput").value.toLowerCase();
-
     const filtered=files.filter(f=>f.name.toLowerCase().includes(key));
-
     const tree=buildTree(filtered);
-
     renderTree(tree, document.getElementById("fileList"));
 }
 
@@ -352,6 +355,31 @@ function escapeHtml(t){
             .replace(/</g,"&lt;")
             .replace(/>/g,"&gt;");
 }
+
+/* ================= RESIZER ================= */
+const sidebar = document.getElementById("sidebar");
+const resizer = document.getElementById("resizer");
+
+let isDragging = false;
+
+resizer.addEventListener("mousedown", function(){
+    isDragging = true;
+    document.body.style.cursor = "col-resize";
+});
+
+document.addEventListener("mousemove", function(e){
+    if(!isDragging) return;
+
+    const newWidth = e.clientX;
+    if(newWidth < 150 || newWidth > 600) return;
+
+    sidebar.style.width = newWidth + "px";
+});
+
+document.addEventListener("mouseup", function(){
+    isDragging = false;
+    document.body.style.cursor = "default";
+});
 
 </script>
 
