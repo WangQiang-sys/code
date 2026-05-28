@@ -138,7 +138,6 @@ body{
     background:#161b22;
     border-right:1px solid #30363d;
     overflow:auto;
-    display:none;
 }
 
 .file-item{
@@ -162,7 +161,6 @@ body{
     background:#30363d;
     cursor:col-resize;
     transition:0.2s;
-    display:none;
 }
 
 .resizer:hover{
@@ -272,14 +270,6 @@ pre{
     line-height:1.8;
 }
 
-.markdown h1{
-    margin-bottom:10px;
-}
-
-.markdown p{
-    margin-bottom:20px;
-}
-
 /* ================= LIGHT MODE ================= */
 
 .light{
@@ -301,18 +291,6 @@ pre{
     color:black;
 }
 
-.light .file-item:hover{
-    background:#e5e5e5;
-}
-
-.light .file-item.active{
-    background:#dcdcdc;
-}
-
-.light .repo-row:hover{
-    background:#f0f0f0;
-}
-
 /* ================= MOBILE ================= */
 
 @media(max-width:768px){
@@ -326,15 +304,7 @@ pre{
     }
 
     .repo-right{
-        gap:15px;
-        font-size:11px;
-    }
-
-    .file-header{
-        flex-direction:column;
-        height:auto;
-        padding:10px;
-        gap:10px;
+        display:none;
     }
 }
 
@@ -343,7 +313,7 @@ pre{
 
 <body>
 
-<!-- ================= LOGIN ================= -->
+<!-- LOGIN -->
 
 <div id="loginPage">
 
@@ -369,7 +339,7 @@ pre{
 
 </div>
 
-<!-- ================= APP ================= -->
+<!-- APP -->
 
 <div id="app">
 
@@ -386,7 +356,7 @@ pre{
             <input
                 type="text"
                 id="searchInput"
-                placeholder="Search file..."
+                placeholder="Search..."
                 onkeyup="filterFiles()"
             >
 
@@ -428,8 +398,8 @@ pre{
 
                 <div class="file-actions">
 
-                    <button onclick="showHomePage()">
-                        Home
+                    <button onclick="goBack()">
+                        Back
                     </button>
 
                     <button onclick="copyCode()">
@@ -461,10 +431,9 @@ pre{
 <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-c.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-cpp.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-javascript.min.js"></script>
 
 <!-- Markdown -->
 
@@ -521,8 +490,6 @@ function login(){
 async function initFiles(){
 
     await loadDirectory("");
-
-    showHomePage();
 }
 
 /* ================= LOAD DIRECTORY ================= */
@@ -542,6 +509,23 @@ async function loadDirectory(path){
         const data =
             await response.json();
 
+        console.log(data);
+
+        if(!Array.isArray(data)){
+
+            document.getElementById("viewer")
+                .innerHTML = `
+
+<h2>GitHub API Error</h2>
+
+<pre>
+${JSON.stringify(data,null,2)}
+</pre>
+`;
+
+            return;
+        }
+
         allFiles = data.map(item => ({
 
             name:item.name,
@@ -550,16 +534,24 @@ async function loadDirectory(path){
 
             type:item.type,
 
-            download_url:item.download_url,
+            html_url:item.html_url,
 
-            html_url:item.html_url
+            download_url:
+`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${item.path}`
+
         }));
 
         renderFiles(allFiles);
 
+        showHomePage();
+
     }catch(err){
 
         console.log(err);
+
+        document.getElementById("viewer")
+            .innerHTML =
+            `<h2>Load Failed</h2>`;
     }
 }
 
@@ -570,12 +562,6 @@ function showHomePage(){
     document.querySelectorAll(".file-item")
         .forEach(x =>
             x.classList.remove("active"));
-
-    document.querySelector(".sidebar")
-        .style.display = "none";
-
-    document.querySelector(".resizer")
-        .style.display = "none";
 
     document.getElementById("currentFile")
         .innerText =
@@ -599,10 +585,6 @@ function showHomePage(){
                 ? "Repository Overview"
                 : currentPath}
         </h1>
-
-        <p>
-            GitHub Repository Browser
-        </p>
 
         <div class="repo-list">
 
@@ -663,14 +645,10 @@ function renderFiles(files){
 
         div.className = "file-item";
 
-        const icon =
-            file.type === "dir"
-            ? "📁"
-            : "📄";
-
-        div.innerHTML = `
-            ${icon} ${file.name}
-        `;
+        div.innerHTML =
+`
+${file.type === "dir" ? "📁" : "📄"} ${file.name}
+`;
 
         div.onclick = async () => {
 
@@ -683,8 +661,6 @@ function renderFiles(files){
             if(file.type === "dir"){
 
                 await loadDirectory(file.path);
-
-                showHomePage();
 
             }else{
 
@@ -718,8 +694,23 @@ function filterFiles(){
 async function openFolder(path){
 
     await loadDirectory(path);
+}
 
-    showHomePage();
+/* ================= BACK ================= */
+
+async function goBack(){
+
+    if(currentPath === "") return;
+
+    const parts =
+        currentPath.split("/");
+
+    parts.pop();
+
+    const parent =
+        parts.join("/");
+
+    await loadDirectory(parent);
 }
 
 /* ================= OPEN FILE BY NAME ================= */
@@ -735,7 +726,7 @@ function openFileByName(path){
     }
 }
 
-/* ================= DETECT LANGUAGE ================= */
+/* ================= LANGUAGE ================= */
 
 function getLanguage(filename){
 
@@ -753,8 +744,7 @@ function getLanguage(filename){
         html:"markup",
         css:"css",
         json:"json",
-        md:"markdown",
-        txt:"none"
+        md:"markdown"
     };
 
     return map[ext] || "none";
@@ -764,25 +754,10 @@ function getLanguage(filename){
 
 async function openFile(file){
 
-    document.querySelector(".sidebar")
-        .style.display = "block";
-
-    document.querySelector(".resizer")
-        .style.display = "block";
-
     document.getElementById("currentFile")
         .innerText = file.name;
 
     currentRawUrl = file.download_url;
-
-    if(!file.download_url){
-
-        document.getElementById("viewer")
-            .innerHTML =
-            "<h2>Cannot Preview</h2>";
-
-        return;
-    }
 
     try{
 
@@ -814,15 +789,11 @@ async function openFile(file){
 
 <div class="markdown">
 
-    <h2>${file.name}</h2>
+<h2>${file.name}</h2>
 
-    <p>
-        Path: ${file.path}
-    </p>
-
-    <p>
-        Type: ${file.type}
-    </p>
+<p>
+Path: ${file.path}
+</p>
 
 </div>
 
@@ -845,7 +816,7 @@ ${escapeHtml(text)}
     }
 }
 
-/* ================= ESCAPE HTML ================= */
+/* ================= ESCAPE ================= */
 
 function escapeHtml(text){
 
@@ -882,30 +853,7 @@ function downloadFile(){
         return;
     }
 
-    fetch(currentRawUrl)
-        .then(response => response.blob())
-        .then(blob => {
-
-            const blobUrl =
-                window.URL.createObjectURL(blob);
-
-            const a =
-                document.createElement("a");
-
-            a.href = blobUrl;
-
-            a.download =
-                document.getElementById("currentFile")
-                .innerText;
-
-            document.body.appendChild(a);
-
-            a.click();
-
-            a.remove();
-
-            window.URL.revokeObjectURL(blobUrl);
-        });
+    window.open(currentRawUrl);
 }
 
 /* ================= THEME ================= */
