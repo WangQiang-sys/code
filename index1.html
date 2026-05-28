@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Mini GitHub C Viewer</title>
+<title>Mini GitHub Viewer</title>
 
-<!-- Prism.js -->
+<!-- Prism -->
 <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet"/>
 
 <style>
@@ -138,11 +138,12 @@ body{
     background:#161b22;
     border-right:1px solid #30363d;
     overflow:auto;
+
+    display:none;
 }
 
 .file-item{
     padding:12px 15px;
-    border-bottom:1px solid #21262d;
     cursor:pointer;
     transition:0.2s;
 }
@@ -162,6 +163,8 @@ body{
     background:#30363d;
     cursor:col-resize;
     transition:0.2s;
+
+    display:none;
 }
 
 .resizer:hover{
@@ -201,42 +204,82 @@ body{
     cursor:pointer;
 }
 
+.file-actions button:hover{
+    background:#2ea043;
+}
+
 .content{
     flex:1;
     overflow:auto;
     padding:20px;
+    width:100%;
 }
 
 /* ================= CODE ================= */
 
 pre{
-    font-size:8px;
-    line-height:1.0;
+    font-size:14px;
+    line-height:1.5;
     border-radius:7px;
+    overflow:auto;
+}
+
+/* ================= REPOSITORY LIST ================= */
+
+.repo-list{
+    margin-top:20px;
+}
+
+.repo-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 18px;
+    transition:0.2s;
+    cursor:pointer;
+    border-radius:8px;
+}
+
+.repo-row:hover{
+    background:#161b22;
+}
+
+.repo-left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:15px;
+}
+
+.repo-icon{
+    font-size:18px;
+}
+
+.repo-name{
+    color:#58a6ff;
+}
+
+.repo-right{
+    display:flex;
+    align-items:center;
+    gap:35px;
+    font-size:13px;
+    color:#8b949e;
 }
 
 /* ================= MARKDOWN ================= */
 
 .markdown{
-    max-width:1000px;
+    max-width:1200px;
     line-height:1.8;
 }
 
-.markdown h1,
-.markdown h2,
-.markdown h3{
-    margin-top:20px;
+.markdown h1{
     margin-bottom:10px;
 }
 
 .markdown p{
-    margin:10px 0;
-}
-
-.markdown code{
-    background:#21262d;
-    padding:2px 6px;
-    border-radius:4px;
+    margin-bottom:20px;
 }
 
 /* ================= LIGHT MODE ================= */
@@ -268,6 +311,10 @@ pre{
     background:#dcdcdc;
 }
 
+.light .repo-row:hover{
+    background:#f0f0f0;
+}
+
 /* ================= MOBILE ================= */
 
 @media(max-width:768px){
@@ -278,6 +325,11 @@ pre{
 
     .logo{
         display:none;
+    }
+
+    .repo-right{
+        gap:15px;
+        font-size:11px;
     }
 
     .file-header{
@@ -301,11 +353,19 @@ pre{
 
         <h1>Mini GitHub</h1>
 
-        <input type="password" id="password" placeholder="Password">
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+        >
 
-        <button onclick="login()">Login</button>
+        <button onclick="login()">
+            Login
+        </button>
 
-        <p id="error" style="color:red;margin-top:10px;"></p>
+        <p id="error"
+           style="color:red;margin-top:10px;">
+        </p>
 
     </div>
 
@@ -315,32 +375,37 @@ pre{
 
 <div id="app">
 
-    <!-- top -->
+    <!-- TOPBAR -->
 
     <div class="topbar">
 
-        <div class="logo">Mini GitHub</div>
+        <div class="logo">
+            Wang Qiang
+        </div>
 
         <div class="search">
+
             <input
                 type="text"
                 id="searchInput"
                 placeholder="Search file..."
                 onkeyup="filterFiles()"
             >
+
         </div>
 
-        <button class="theme-btn" onclick="toggleTheme()">
+        <button class="theme-btn"
+                onclick="toggleTheme()">
             Theme
         </button>
 
     </div>
 
-    <!-- main -->
+    <!-- MAIN -->
 
     <div class="container">
 
-        <!-- sidebar -->
+        <!-- SIDEBAR -->
 
         <div class="sidebar">
 
@@ -348,21 +413,26 @@ pre{
 
         </div>
 
-        <!-- resizer -->
+        <!-- RESIZER -->
 
-        <div class="resizer" id="resizer"></div>
+        <div class="resizer"
+             id="resizer"></div>
 
-        <!-- content -->
+        <!-- CONTENT -->
 
         <div class="main">
 
             <div class="file-header">
 
                 <div id="currentFile">
-                    No file selected
+                    Repository Overview
                 </div>
 
                 <div class="file-actions">
+
+                    <button onclick="showHomePage()">
+                        Home
+                    </button>
 
                     <button onclick="copyCode()">
                         Copy
@@ -389,10 +459,13 @@ pre{
 </div>
 
 <!-- Prism -->
+
 <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-c.min.js"></script>
 
 <!-- Markdown -->
+
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script>
@@ -411,9 +484,21 @@ const BRANCH = "main";
 
 const files = [
 
-    "Calculated_Irradiation_Time.c",
+{
+    name:"Calculated_Irradiation_Time.c",
+    folder:"src",
+    type:"C Source",
+    modified:"2026-05-28",
+    version:"v2.3"
+},
 
-    "test.h"
+{
+    name:"test.h",
+    folder:"include",
+    type:"Header",
+    modified:"2026-05-25",
+    version:"v1.1"
+}
 
 ];
 
@@ -453,22 +538,91 @@ function login(){
 
 function initFiles(){
 
-    allFiles = files.map(name => ({
+    allFiles = files.map(file => ({
 
-        name: name,
+        ...file,
 
         download_url:
-`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${name}`
+`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${file.name}`
 
     }));
 
     renderFiles(allFiles);
 
-    // 自动打开第一个文件
-    if(allFiles.length > 0){
+    showHomePage();
+}
 
-        openFile(allFiles[0]);
-    }
+/* ================= HOMEPAGE ================= */
+
+function showHomePage(){
+
+    document.querySelectorAll(".file-item")
+        .forEach(x =>
+            x.classList.remove("active"));
+
+    document.querySelector(".sidebar")
+        .style.display = "none";
+
+    document.querySelector(".resizer")
+        .style.display = "none";
+
+    document.getElementById("currentFile")
+        .innerText = "Repository Overview";
+
+    currentText = "";
+
+    currentRawUrl = "";
+
+    const viewer =
+        document.getElementById("viewer");
+
+    viewer.innerHTML = `
+
+    <div class="markdown">
+
+        <div class="repo-list">
+
+            ${allFiles.map(file => `
+
+            <div class="repo-row"
+                 onclick="openFileByName('${file.name}')">
+
+                <div class="repo-left">
+
+                    <span class="repo-icon">
+                        📄
+                    </span>
+
+                    <span class="repo-name">
+                        ${file.name}
+                    </span>
+
+                </div>
+
+                <div class="repo-right">
+
+                    <span>
+                        ${file.type}
+                    </span>
+
+                    <span>
+                        ${file.modified}
+                    </span>
+
+                    <span>
+                        ${file.version}
+                    </span>
+
+                </div>
+
+            </div>
+
+            `).join("")}
+
+        </div>
+
+    </div>
+    `;
 }
 
 /* ================= RENDER FILES ================= */
@@ -487,12 +641,15 @@ function renderFiles(files){
 
         div.className = "file-item";
 
-        div.innerText = file.name;
+        div.innerHTML = `
+            📄 ${file.name}
+        `;
 
         div.onclick = () => {
 
             document.querySelectorAll(".file-item")
-                .forEach(x => x.classList.remove("active"));
+                .forEach(x =>
+                    x.classList.remove("active"));
 
             div.classList.add("active");
 
@@ -520,9 +677,28 @@ function filterFiles(){
     renderFiles(filtered);
 }
 
+/* ================= OPEN BY NAME ================= */
+
+function openFileByName(name){
+
+    const file =
+        allFiles.find(f => f.name === name);
+
+    if(file){
+
+        openFile(file);
+    }
+}
+
 /* ================= OPEN FILE ================= */
 
 async function openFile(file){
+
+    document.querySelector(".sidebar")
+        .style.display = "block";
+
+    document.querySelector(".resizer")
+        .style.display = "block";
 
     document.getElementById("currentFile")
         .innerText = file.name;
@@ -542,21 +718,47 @@ async function openFile(file){
         const viewer =
             document.getElementById("viewer");
 
-        /* markdown */
-
         if(file.name.toLowerCase().endsWith(".md")){
 
             viewer.innerHTML =
-                `<div class="markdown">${marked.parse(text)}</div>`;
+                `<div class="markdown">
+                    ${marked.parse(text)}
+                </div>`;
         }
-
-        /* c/h */
 
         else{
 
-            viewer.innerHTML =
+            viewer.innerHTML = `
 
-`<pre><code class="language-c">${escapeHtml(text)}</code></pre>`;
+<div class="markdown">
+
+    <h2>${file.name}</h2>
+
+    <p>
+        Folder: ${file.folder}
+    </p>
+
+    <p>
+        Modified: ${file.modified}
+    </p>
+
+    <p>
+        Type: ${file.type}
+    </p>
+
+    <p>
+        Version: ${file.version}
+    </p>
+
+</div>
+
+<pre>
+<code class="language-c">
+${escapeHtml(text)}
+</code>
+</pre>
+
+`;
 
             Prism.highlightAll();
         }
@@ -583,6 +785,13 @@ function escapeHtml(text){
 
 function copyCode(){
 
+    if(!currentText){
+
+        alert("No file opened");
+
+        return;
+    }
+
     navigator.clipboard.writeText(currentText);
 
     alert("Copied!");
@@ -592,7 +801,12 @@ function copyCode(){
 
 function downloadFile(){
 
-    if(!currentRawUrl) return;
+    if(!currentRawUrl){
+
+        alert("No file opened");
+
+        return;
+    }
 
     fetch(currentRawUrl)
         .then(response => response.blob())
