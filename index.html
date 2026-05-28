@@ -138,6 +138,8 @@ body{
     background:#161b22;
     border-right:1px solid #30363d;
     overflow:auto;
+
+    display:none;
 }
 
 .file-item{
@@ -161,6 +163,8 @@ body{
     background:#30363d;
     cursor:col-resize;
     transition:0.2s;
+
+    display:none;
 }
 
 .resizer:hover{
@@ -270,6 +274,14 @@ pre{
     line-height:1.8;
 }
 
+.markdown h1{
+    margin-bottom:10px;
+}
+
+.markdown p{
+    margin-bottom:20px;
+}
+
 /* ================= LIGHT MODE ================= */
 
 .light{
@@ -291,6 +303,18 @@ pre{
     color:black;
 }
 
+.light .file-item:hover{
+    background:#e5e5e5;
+}
+
+.light .file-item.active{
+    background:#dcdcdc;
+}
+
+.light .repo-row:hover{
+    background:#f0f0f0;
+}
+
 /* ================= MOBILE ================= */
 
 @media(max-width:768px){
@@ -304,7 +328,15 @@ pre{
     }
 
     .repo-right{
-        display:none;
+        gap:15px;
+        font-size:11px;
+    }
+
+    .file-header{
+        flex-direction:column;
+        height:auto;
+        padding:10px;
+        gap:10px;
     }
 }
 
@@ -313,7 +345,7 @@ pre{
 
 <body>
 
-<!-- LOGIN -->
+<!-- ================= LOGIN ================= -->
 
 <div id="loginPage">
 
@@ -339,7 +371,7 @@ pre{
 
 </div>
 
-<!-- APP -->
+<!-- ================= APP ================= -->
 
 <div id="app">
 
@@ -348,7 +380,7 @@ pre{
     <div class="topbar">
 
         <div class="logo">
-            Mini GitHub
+            Wang Qiang
         </div>
 
         <div class="search">
@@ -356,7 +388,7 @@ pre{
             <input
                 type="text"
                 id="searchInput"
-                placeholder="Search..."
+                placeholder="Search file..."
                 onkeyup="filterFiles()"
             >
 
@@ -398,8 +430,8 @@ pre{
 
                 <div class="file-actions">
 
-                    <button onclick="goBack()">
-                        Back
+                    <button onclick="showHomePage()">
+                        Home
                     </button>
 
                     <button onclick="copyCode()">
@@ -431,9 +463,6 @@ pre{
 <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-c.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-cpp.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-javascript.min.js"></script>
 
 <!-- Markdown -->
 
@@ -451,6 +480,28 @@ const REPO_NAME = "code";
 
 const BRANCH = "main";
 
+/* ================= FILES ================= */
+
+const files = [
+
+{
+    name:"Calculated_Irradiation_Time.c",
+    folder:"src",
+    type:"C Source",
+    modified:"2026-05-28",
+    version:"v2.3"
+},
+
+{
+    name:"test.h",
+    folder:"include",
+    type:"Header",
+    modified:"2026-05-25",
+    version:"v1.1"
+}
+
+];
+
 /* ================= GLOBAL ================= */
 
 let allFiles = [];
@@ -458,8 +509,6 @@ let allFiles = [];
 let currentText = "";
 
 let currentRawUrl = "";
-
-let currentPath = "";
 
 /* ================= LOGIN ================= */
 
@@ -485,74 +534,22 @@ function login(){
     }
 }
 
-/* ================= INIT ================= */
+/* ================= INIT FILES ================= */
 
-async function initFiles(){
+function initFiles(){
 
-    await loadDirectory("");
-}
+    allFiles = files.map(file => ({
 
-/* ================= LOAD DIRECTORY ================= */
+        ...file,
 
-async function loadDirectory(path){
+        download_url:
+`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${file.name}`
 
-    currentPath = path;
+    }));
 
-    const apiUrl =
-`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}`;
+    renderFiles(allFiles);
 
-    try{
-
-        const response =
-            await fetch(apiUrl);
-
-        const data =
-            await response.json();
-
-        console.log(data);
-
-        if(!Array.isArray(data)){
-
-            document.getElementById("viewer")
-                .innerHTML = `
-
-<h2>GitHub API Error</h2>
-
-<pre>
-${JSON.stringify(data,null,2)}
-</pre>
-`;
-
-            return;
-        }
-
-        allFiles = data.map(item => ({
-
-            name:item.name,
-
-            path:item.path,
-
-            type:item.type,
-
-            html_url:item.html_url,
-
-            download_url:
-`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${item.path}`
-
-        }));
-
-        renderFiles(allFiles);
-
-        showHomePage();
-
-    }catch(err){
-
-        console.log(err);
-
-        document.getElementById("viewer")
-            .innerHTML =
-            `<h2>Load Failed</h2>`;
-    }
+    showHomePage();
 }
 
 /* ================= HOMEPAGE ================= */
@@ -563,11 +560,14 @@ function showHomePage(){
         .forEach(x =>
             x.classList.remove("active"));
 
+    document.querySelector(".sidebar")
+        .style.display = "none";
+
+    document.querySelector(".resizer")
+        .style.display = "none";
+
     document.getElementById("currentFile")
-        .innerText =
-        currentPath === ""
-        ? "Repository Overview"
-        : currentPath;
+        .innerText = "Repository Overview";
 
     currentText = "";
 
@@ -580,29 +580,17 @@ function showHomePage(){
 
     <div class="markdown">
 
-        <h1>
-            ${currentPath === ""
-                ? "Repository Overview"
-                : currentPath}
-        </h1>
-
         <div class="repo-list">
 
             ${allFiles.map(file => `
 
             <div class="repo-row"
-                 onclick="${
-                    file.type === 'dir'
-                    ? `openFolder('${file.path}')`
-                    : `openFileByName('${file.path}')`
-                 }">
+                 onclick="openFileByName('${file.name}')">
 
                 <div class="repo-left">
 
                     <span class="repo-icon">
-                        ${file.type === "dir"
-                            ? "📁"
-                            : "📄"}
+                        📄
                     </span>
 
                     <span class="repo-name">
@@ -615,6 +603,14 @@ function showHomePage(){
 
                     <span>
                         ${file.type}
+                    </span>
+
+                    <span>
+                        ${file.modified}
+                    </span>
+
+                    <span>
+                        ${file.version}
                     </span>
 
                 </div>
@@ -645,12 +641,11 @@ function renderFiles(files){
 
         div.className = "file-item";
 
-        div.innerHTML =
-`
-${file.type === "dir" ? "📁" : "📄"} ${file.name}
-`;
+        div.innerHTML = `
+            📄 ${file.name}
+        `;
 
-        div.onclick = async () => {
+        div.onclick = () => {
 
             document.querySelectorAll(".file-item")
                 .forEach(x =>
@@ -658,14 +653,7 @@ ${file.type === "dir" ? "📁" : "📄"} ${file.name}
 
             div.classList.add("active");
 
-            if(file.type === "dir"){
-
-                await loadDirectory(file.path);
-
-            }else{
-
-                openFile(file);
-            }
+            openFile(file);
         };
 
         list.appendChild(div);
@@ -689,36 +677,12 @@ function filterFiles(){
     renderFiles(filtered);
 }
 
-/* ================= OPEN FOLDER ================= */
+/* ================= OPEN BY NAME ================= */
 
-async function openFolder(path){
-
-    await loadDirectory(path);
-}
-
-/* ================= BACK ================= */
-
-async function goBack(){
-
-    if(currentPath === "") return;
-
-    const parts =
-        currentPath.split("/");
-
-    parts.pop();
-
-    const parent =
-        parts.join("/");
-
-    await loadDirectory(parent);
-}
-
-/* ================= OPEN FILE BY NAME ================= */
-
-function openFileByName(path){
+function openFileByName(name){
 
     const file =
-        allFiles.find(f => f.path === path);
+        allFiles.find(f => f.name === name);
 
     if(file){
 
@@ -726,33 +690,15 @@ function openFileByName(path){
     }
 }
 
-/* ================= LANGUAGE ================= */
-
-function getLanguage(filename){
-
-    const ext =
-        filename.split(".").pop().toLowerCase();
-
-    const map = {
-
-        c:"c",
-        cpp:"cpp",
-        h:"c",
-        hpp:"cpp",
-        py:"python",
-        js:"javascript",
-        html:"markup",
-        css:"css",
-        json:"json",
-        md:"markdown"
-    };
-
-    return map[ext] || "none";
-}
-
 /* ================= OPEN FILE ================= */
 
 async function openFile(file){
+
+    document.querySelector(".sidebar")
+        .style.display = "block";
+
+    document.querySelector(".resizer")
+        .style.display = "block";
 
     document.getElementById("currentFile")
         .innerText = file.name;
@@ -782,23 +728,32 @@ async function openFile(file){
 
         else{
 
-            const lang =
-                getLanguage(file.name);
-
             viewer.innerHTML = `
 
 <div class="markdown">
 
-<h2>${file.name}</h2>
+    <h2>${file.name}</h2>
 
-<p>
-Path: ${file.path}
-</p>
+    <p>
+        Folder: ${file.folder}
+    </p>
+
+    <p>
+        Modified: ${file.modified}
+    </p>
+
+    <p>
+        Type: ${file.type}
+    </p>
+
+    <p>
+        Version: ${file.version}
+    </p>
 
 </div>
 
 <pre>
-<code class="language-${lang}">
+<code class="language-c">
 ${escapeHtml(text)}
 </code>
 </pre>
@@ -816,7 +771,7 @@ ${escapeHtml(text)}
     }
 }
 
-/* ================= ESCAPE ================= */
+/* ================= ESCAPE HTML ================= */
 
 function escapeHtml(text){
 
@@ -853,7 +808,30 @@ function downloadFile(){
         return;
     }
 
-    window.open(currentRawUrl);
+    fetch(currentRawUrl)
+        .then(response => response.blob())
+        .then(blob => {
+
+            const blobUrl =
+                window.URL.createObjectURL(blob);
+
+            const a =
+                document.createElement("a");
+
+            a.href = blobUrl;
+
+            a.download =
+                document.getElementById("currentFile")
+                .innerText;
+
+            document.body.appendChild(a);
+
+            a.click();
+
+            a.remove();
+
+            window.URL.revokeObjectURL(blobUrl);
+        });
 }
 
 /* ================= THEME ================= */
