@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Mini GitHub C Viewer</title>
+<title>Mini GitHub Pro</title>
 
-<!-- Prism.js -->
+<!-- Prism -->
 <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet"/>
 
 <style>
@@ -90,8 +90,8 @@ body{
     border-bottom:1px solid #30363d;
     display:flex;
     align-items:center;
-    padding:0 15px;
     gap:15px;
+    padding:0 15px;
 }
 
 .logo{
@@ -132,16 +132,16 @@ body{
 /* ================= SIDEBAR ================= */
 
 .sidebar{
-    width:280px;
+    width:300px;
     min-width:180px;
-    max-width:600px;
+    max-width:700px;
     background:#161b22;
     border-right:1px solid #30363d;
     overflow:auto;
 }
 
 .file-item{
-    padding:12px 15px;
+    padding:10px 15px;
     border-bottom:1px solid #21262d;
     cursor:pointer;
     transition:0.2s;
@@ -155,20 +155,31 @@ body{
     background:#30363d;
 }
 
+.file-name{
+    font-size:12px;
+}
+
+.file-info{
+    margin-top:5px;
+    display:flex;
+    justify-content:space-between;
+    color:#8b949e;
+    font-size:10px;
+}
+
 /* ================= RESIZER ================= */
 
 .resizer{
     width:5px;
     background:#30363d;
     cursor:col-resize;
-    transition:0.2s;
 }
 
 .resizer:hover{
     background:#58a6ff;
 }
 
-/* ================= CONTENT ================= */
+/* ================= MAIN ================= */
 
 .main{
     flex:1;
@@ -178,13 +189,24 @@ body{
 }
 
 .file-header{
-    height:55px;
+    height:60px;
     background:#161b22;
     border-bottom:1px solid #30363d;
     display:flex;
     justify-content:space-between;
     align-items:center;
     padding:0 20px;
+}
+
+.file-title{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+
+.file-title small{
+    color:#8b949e;
+    font-size:11px;
 }
 
 .file-actions{
@@ -210,9 +232,43 @@ body{
 /* ================= CODE ================= */
 
 pre{
-    font-size:8px;
+    font-size:6px;
     line-height:1.0;
-    border-radius:7px;
+    border-radius:8px;
+}
+
+/* ================= EDITOR ================= */
+
+#editor{
+    width:100%;
+    height:100%;
+    background:#0d1117;
+    color:#c9d1d9;
+    border:none;
+    outline:none;
+    resize:none;
+    font-family:Consolas, monospace;
+    font-size:11px;
+    line-height:1.4;
+}
+
+/* ================= HISTORY ================= */
+
+.history-box{
+    margin-top:20px;
+    border-top:1px solid #30363d;
+    padding-top:15px;
+}
+
+.commit-item{
+    padding:10px;
+    border-bottom:1px solid #21262d;
+    font-size:11px;
+}
+
+.commit-date{
+    color:#8b949e;
+    margin-top:4px;
 }
 
 /* ================= MARKDOWN ================= */
@@ -222,28 +278,11 @@ pre{
     line-height:1.8;
 }
 
-.markdown h1,
-.markdown h2,
-.markdown h3{
-    margin-top:20px;
-    margin-bottom:10px;
-}
-
-.markdown p{
-    margin:10px 0;
-}
-
-.markdown code{
-    background:#21262d;
-    padding:2px 6px;
-    border-radius:4px;
-}
-
-/* ================= LIGHT MODE ================= */
+/* ================= LIGHT ================= */
 
 .light{
-    background:#ffffff;
-    color:#111;
+    background:white;
+    color:black;
 }
 
 .light .topbar,
@@ -251,7 +290,7 @@ pre{
 .light .file-header,
 .light .login-box{
     background:#f5f5f5;
-    color:#111;
+    color:black;
 }
 
 .light .search input,
@@ -260,12 +299,9 @@ pre{
     color:black;
 }
 
-.light .file-item:hover{
-    background:#e5e5e5;
-}
-
-.light .file-item.active{
-    background:#dcdcdc;
+.light #editor{
+    background:white;
+    color:black;
 }
 
 /* ================= MOBILE ================= */
@@ -293,7 +329,7 @@ pre{
 
 <body>
 
-<!-- ================= LOGIN ================= -->
+<!-- LOGIN -->
 
 <div id="loginPage">
 
@@ -311,23 +347,25 @@ pre{
 
 </div>
 
-<!-- ================= APP ================= -->
+<!-- APP -->
 
 <div id="app">
 
-    <!-- top -->
+    <!-- TOP -->
 
     <div class="topbar">
 
-        <div class="logo">Mini GitHub</div>
+        <div class="logo">Mini GitHub Pro</div>
 
         <div class="search">
+
             <input
                 type="text"
                 id="searchInput"
-                placeholder="Search file..."
+                placeholder="Search..."
                 onkeyup="filterFiles()"
             >
+
         </div>
 
         <button class="theme-btn" onclick="toggleTheme()">
@@ -336,11 +374,11 @@ pre{
 
     </div>
 
-    <!-- main -->
+    <!-- MAIN -->
 
     <div class="container">
 
-        <!-- sidebar -->
+        <!-- SIDEBAR -->
 
         <div class="sidebar">
 
@@ -348,18 +386,26 @@ pre{
 
         </div>
 
-        <!-- resizer -->
+        <!-- RESIZER -->
 
         <div class="resizer" id="resizer"></div>
 
-        <!-- content -->
+        <!-- CONTENT -->
 
         <div class="main">
 
             <div class="file-header">
 
-                <div id="currentFile">
-                    No file selected
+                <div class="file-title">
+
+                    <div id="currentFile">
+                        No file selected
+                    </div>
+
+                    <small id="lastUpdate">
+                        -
+                    </small>
+
                 </div>
 
                 <div class="file-actions">
@@ -372,13 +418,26 @@ pre{
                         Download
                     </button>
 
+                    <button onclick="toggleEdit()">
+                        Edit
+                    </button>
+
                 </div>
 
             </div>
 
             <div class="content">
 
-                <div id="viewer"></div>
+                <div id="viewer">
+
+                    <div style="
+                        padding:40px;
+                        color:#8b949e;
+                    ">
+                        Select a file to view
+                    </div>
+
+                </div>
 
             </div>
 
@@ -389,10 +448,12 @@ pre{
 </div>
 
 <!-- Prism -->
+
 <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-c.min.js"></script>
 
 <!-- Markdown -->
+
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script>
@@ -407,16 +468,6 @@ const REPO_NAME = "code";
 
 const BRANCH = "main";
 
-/* ================= FILES ================= */
-
-const files = [
-
-    "Calculated_Irradiation_Time.c",
-
-    "test.h"
-
-];
-
 /* ================= GLOBAL ================= */
 
 let allFiles = [];
@@ -424,6 +475,10 @@ let allFiles = [];
 let currentText = "";
 
 let currentRawUrl = "";
+
+let currentFilePath = "";
+
+let isEditing = false;
 
 /* ================= LOGIN ================= */
 
@@ -440,7 +495,7 @@ function login(){
         document.getElementById("app")
             .style.display = "flex";
 
-        initFiles();
+        loadFiles();
 
     }else{
 
@@ -449,26 +504,33 @@ function login(){
     }
 }
 
-/* ================= INIT FILES ================= */
+/* ================= LOAD FILES ================= */
 
-function initFiles(){
+async function loadFiles(){
 
-    allFiles = files.map(name => ({
+    const url =
 
-        name: name,
+`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/`;
 
-        download_url:
-`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${name}`
+    const response = await fetch(url);
 
-    }));
+    const data = await response.json();
+
+    allFiles = data.filter(x => x.type === "file");
 
     renderFiles(allFiles);
+}
 
-    // 自动打开第一个文件
-    if(allFiles.length > 0){
+/* ================= FILE ICON ================= */
 
-        openFile(allFiles[0]);
-    }
+function getIcon(name){
+
+    if(name.endsWith(".c")) return "🟦";
+    if(name.endsWith(".h")) return "🟨";
+    if(name.endsWith(".md")) return "🟩";
+    if(name.endsWith(".txt")) return "📄";
+
+    return "📁";
 }
 
 /* ================= RENDER FILES ================= */
@@ -487,7 +549,24 @@ function renderFiles(files){
 
         div.className = "file-item";
 
-        div.innerText = file.name;
+        const ext =
+            file.name.split(".").pop().toUpperCase();
+
+        div.innerHTML = `
+
+<div class="file-name">
+${getIcon(file.name)} ${file.name}
+</div>
+
+<div class="file-info">
+
+<span>${ext}</span>
+
+<span>${(file.size/1024).toFixed(1)} KB</span>
+
+</div>
+
+`;
 
         div.onclick = () => {
 
@@ -524,10 +603,12 @@ function filterFiles(){
 
 async function openFile(file){
 
-    document.getElementById("currentFile")
-        .innerText = file.name;
+    currentFilePath = file.path;
 
     currentRawUrl = file.download_url;
+
+    document.getElementById("currentFile")
+        .innerText = file.name;
 
     try{
 
@@ -539,27 +620,9 @@ async function openFile(file){
 
         currentText = text;
 
-        const viewer =
-            document.getElementById("viewer");
+        renderCode(file.name, text);
 
-        /* markdown */
-
-        if(file.name.toLowerCase().endsWith(".md")){
-
-            viewer.innerHTML =
-                `<div class="markdown">${marked.parse(text)}</div>`;
-        }
-
-        /* c/h */
-
-        else{
-
-            viewer.innerHTML =
-
-`<pre><code class="language-c">${escapeHtml(text)}</code></pre>`;
-
-            Prism.highlightAll();
-        }
+        loadHistory(file.path);
 
     }catch(err){
 
@@ -569,14 +632,145 @@ async function openFile(file){
     }
 }
 
-/* ================= ESCAPE HTML ================= */
+/* ================= RENDER CODE ================= */
+
+function renderCode(filename, text){
+
+    const viewer =
+        document.getElementById("viewer");
+
+    if(filename.endsWith(".md")){
+
+        viewer.innerHTML = `
+
+<div class="markdown">
+${marked.parse(text)}
+</div>
+
+`;
+    }
+
+    else{
+
+        viewer.innerHTML = `
+
+<pre>
+<code class="language-c">
+${escapeHtml(text)}
+</code>
+</pre>
+
+`;
+
+        Prism.highlightAll();
+    }
+}
+
+/* ================= HISTORY ================= */
+
+async function loadHistory(path){
+
+    const url =
+
+`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/commits?path=${path}`;
+
+    try{
+
+        const response = await fetch(url);
+
+        const commits = await response.json();
+
+        if(commits.length > 0){
+
+            const latest = commits[0];
+
+            document.getElementById("lastUpdate")
+                .innerText =
+
+`Last Update: ${latest.commit.author.date}`;
+
+            let html = `
+
+<div class="history-box">
+
+<h3 style="margin-bottom:10px;">
+History
+</h3>
+
+`;
+
+            commits.slice(0,5).forEach(c => {
+
+                html += `
+
+<div class="commit-item">
+
+<div>
+${c.commit.message}
+</div>
+
+<div class="commit-date">
+${c.commit.author.date}
+</div>
+
+</div>
+
+`;
+            });
+
+            html += `</div>`;
+
+            document.getElementById("viewer")
+                .innerHTML += html;
+        }
+
+    }catch(err){
+
+        console.log(err);
+    }
+}
+
+/* ================= EDIT ================= */
+
+function toggleEdit(){
+
+    if(!currentText) return;
+
+    const viewer =
+        document.getElementById("viewer");
+
+    if(!isEditing){
+
+        viewer.innerHTML = `
+
+<textarea id="editor">
+${currentText}
+</textarea>
+
+`;
+
+        isEditing = true;
+    }
+
+    else{
+
+        currentText =
+            document.getElementById("editor").value;
+
+        renderCode(currentFilePath, currentText);
+
+        isEditing = false;
+    }
+}
+
+/* ================= ESCAPE ================= */
 
 function escapeHtml(text){
 
     return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;");
 }
 
 /* ================= COPY ================= */
