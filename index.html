@@ -138,7 +138,6 @@ body{
     background:#161b22;
     border-right:1px solid #30363d;
     overflow:auto;
-
     display:none;
 }
 
@@ -163,7 +162,6 @@ body{
     background:#30363d;
     cursor:col-resize;
     transition:0.2s;
-
     display:none;
 }
 
@@ -380,7 +378,7 @@ pre{
     <div class="topbar">
 
         <div class="logo">
-            Wang Qiang
+            Mini GitHub
         </div>
 
         <div class="search">
@@ -464,6 +462,10 @@ pre{
 
 <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-c.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-cpp.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
+
 <!-- Markdown -->
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -480,28 +482,6 @@ const REPO_NAME = "code";
 
 const BRANCH = "main";
 
-/* ================= FILES ================= */
-
-const files = [
-
-{
-    name:"Calculated_Irradiation_Time.c",
-    folder:"src",
-    type:"C Source",
-    modified:"2026-05-28",
-    version:"v2.3"
-},
-
-{
-    name:"test.h",
-    folder:"include",
-    type:"Header",
-    modified:"2026-05-25",
-    version:"v1.1"
-}
-
-];
-
 /* ================= GLOBAL ================= */
 
 let allFiles = [];
@@ -509,6 +489,8 @@ let allFiles = [];
 let currentText = "";
 
 let currentRawUrl = "";
+
+let currentPath = "";
 
 /* ================= LOGIN ================= */
 
@@ -534,22 +516,51 @@ function login(){
     }
 }
 
-/* ================= INIT FILES ================= */
+/* ================= INIT ================= */
 
-function initFiles(){
+async function initFiles(){
 
-    allFiles = files.map(file => ({
-
-        ...file,
-
-        download_url:
-`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${file.name}`
-
-    }));
-
-    renderFiles(allFiles);
+    await loadDirectory("");
 
     showHomePage();
+}
+
+/* ================= LOAD DIRECTORY ================= */
+
+async function loadDirectory(path){
+
+    currentPath = path;
+
+    const apiUrl =
+`https://api.github.com/repos/${GITHUB_USER}/${REPO_NAME}/contents/${path}?ref=${BRANCH}`;
+
+    try{
+
+        const response =
+            await fetch(apiUrl);
+
+        const data =
+            await response.json();
+
+        allFiles = data.map(item => ({
+
+            name:item.name,
+
+            path:item.path,
+
+            type:item.type,
+
+            download_url:item.download_url,
+
+            html_url:item.html_url
+        }));
+
+        renderFiles(allFiles);
+
+    }catch(err){
+
+        console.log(err);
+    }
 }
 
 /* ================= HOMEPAGE ================= */
@@ -567,7 +578,10 @@ function showHomePage(){
         .style.display = "none";
 
     document.getElementById("currentFile")
-        .innerText = "Repository Overview";
+        .innerText =
+        currentPath === ""
+        ? "Repository Overview"
+        : currentPath;
 
     currentText = "";
 
@@ -580,17 +594,33 @@ function showHomePage(){
 
     <div class="markdown">
 
+        <h1>
+            ${currentPath === ""
+                ? "Repository Overview"
+                : currentPath}
+        </h1>
+
+        <p>
+            GitHub Repository Browser
+        </p>
+
         <div class="repo-list">
 
             ${allFiles.map(file => `
 
             <div class="repo-row"
-                 onclick="openFileByName('${file.name}')">
+                 onclick="${
+                    file.type === 'dir'
+                    ? `openFolder('${file.path}')`
+                    : `openFileByName('${file.path}')`
+                 }">
 
                 <div class="repo-left">
 
                     <span class="repo-icon">
-                        📄
+                        ${file.type === "dir"
+                            ? "📁"
+                            : "📄"}
                     </span>
 
                     <span class="repo-name">
@@ -603,14 +633,6 @@ function showHomePage(){
 
                     <span>
                         ${file.type}
-                    </span>
-
-                    <span>
-                        ${file.modified}
-                    </span>
-
-                    <span>
-                        ${file.version}
                     </span>
 
                 </div>
@@ -641,11 +663,16 @@ function renderFiles(files){
 
         div.className = "file-item";
 
+        const icon =
+            file.type === "dir"
+            ? "📁"
+            : "📄";
+
         div.innerHTML = `
-            📄 ${file.name}
+            ${icon} ${file.name}
         `;
 
-        div.onclick = () => {
+        div.onclick = async () => {
 
             document.querySelectorAll(".file-item")
                 .forEach(x =>
@@ -653,7 +680,16 @@ function renderFiles(files){
 
             div.classList.add("active");
 
-            openFile(file);
+            if(file.type === "dir"){
+
+                await loadDirectory(file.path);
+
+                showHomePage();
+
+            }else{
+
+                openFile(file);
+            }
         };
 
         list.appendChild(div);
@@ -677,17 +713,51 @@ function filterFiles(){
     renderFiles(filtered);
 }
 
-/* ================= OPEN BY NAME ================= */
+/* ================= OPEN FOLDER ================= */
 
-function openFileByName(name){
+async function openFolder(path){
+
+    await loadDirectory(path);
+
+    showHomePage();
+}
+
+/* ================= OPEN FILE BY NAME ================= */
+
+function openFileByName(path){
 
     const file =
-        allFiles.find(f => f.name === name);
+        allFiles.find(f => f.path === path);
 
     if(file){
 
         openFile(file);
     }
+}
+
+/* ================= DETECT LANGUAGE ================= */
+
+function getLanguage(filename){
+
+    const ext =
+        filename.split(".").pop().toLowerCase();
+
+    const map = {
+
+        c:"c",
+        cpp:"cpp",
+        h:"c",
+        hpp:"cpp",
+        py:"python",
+        js:"javascript",
+        html:"markup",
+        css:"css",
+        json:"json",
+        md:"markdown",
+        txt:"none"
+    };
+
+    return map[ext] || "none";
 }
 
 /* ================= OPEN FILE ================= */
@@ -704,6 +774,15 @@ async function openFile(file){
         .innerText = file.name;
 
     currentRawUrl = file.download_url;
+
+    if(!file.download_url){
+
+        document.getElementById("viewer")
+            .innerHTML =
+            "<h2>Cannot Preview</h2>";
+
+        return;
+    }
 
     try{
 
@@ -728,6 +807,9 @@ async function openFile(file){
 
         else{
 
+            const lang =
+                getLanguage(file.name);
+
             viewer.innerHTML = `
 
 <div class="markdown">
@@ -735,25 +817,17 @@ async function openFile(file){
     <h2>${file.name}</h2>
 
     <p>
-        Folder: ${file.folder}
-    </p>
-
-    <p>
-        Modified: ${file.modified}
+        Path: ${file.path}
     </p>
 
     <p>
         Type: ${file.type}
     </p>
 
-    <p>
-        Version: ${file.version}
-    </p>
-
 </div>
 
 <pre>
-<code class="language-c">
+<code class="language-${lang}">
 ${escapeHtml(text)}
 </code>
 </pre>
