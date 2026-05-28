@@ -1,18 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Mini GitHub Viewer</title>
 
 <!-- Prism -->
-
-<link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css"
-      rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet"/>
 
 <style>
 
@@ -30,7 +25,7 @@ body{
     overflow:hidden;
 }
 
-/* LOGIN */
+/* ================= LOGIN ================= */
 
 #loginPage{
     display:flex;
@@ -72,9 +67,14 @@ body{
     color:white;
     border-radius:6px;
     cursor:pointer;
+    font-size:16px;
 }
 
-/* APP */
+.login-box button:hover{
+    background:#2ea043;
+}
+
+/* ================= APP ================= */
 
 #app{
     display:none;
@@ -82,7 +82,7 @@ body{
     flex-direction:column;
 }
 
-/* TOPBAR */
+/* ================= TOPBAR ================= */
 
 .topbar{
     height:55px;
@@ -121,7 +121,7 @@ body{
     cursor:pointer;
 }
 
-/* MAIN */
+/* ================= MAIN ================= */
 
 .container{
     flex:1;
@@ -129,7 +129,7 @@ body{
     overflow:hidden;
 }
 
-/* SIDEBAR */
+/* ================= SIDEBAR ================= */
 
 .sidebar{
     width:280px;
@@ -142,15 +142,8 @@ body{
     display:none;
 }
 
-.folder-title{
-    padding:10px 15px;
-    font-weight:bold;
-    color:#58a6ff;
-    border-bottom:1px solid #30363d;
-}
-
 .file-item{
-    padding:12px 15px 12px 35px;
+    padding:12px 15px;
     cursor:pointer;
     transition:0.2s;
 }
@@ -163,17 +156,22 @@ body{
     background:#30363d;
 }
 
-/* RESIZER */
+/* ================= RESIZER ================= */
 
 .resizer{
     width:5px;
     background:#30363d;
     cursor:col-resize;
+    transition:0.2s;
 
     display:none;
 }
 
-/* CONTENT */
+.resizer:hover{
+    background:#58a6ff;
+}
+
+/* ================= CONTENT ================= */
 
 .main{
     flex:1;
@@ -206,13 +204,18 @@ body{
     cursor:pointer;
 }
 
+.file-actions button:hover{
+    background:#2ea043;
+}
+
 .content{
     flex:1;
     overflow:auto;
     padding:20px;
+    width:100%;
 }
 
-/* CODE */
+/* ================= CODE ================= */
 
 pre{
     font-size:14px;
@@ -221,17 +224,20 @@ pre{
     overflow:auto;
 }
 
-.markdown{
-    max-width:1200px;
-    line-height:1.8;
+/* ================= REPOSITORY LIST ================= */
+
+.repo-list{
+    margin-top:20px;
 }
 
 .repo-row{
     display:flex;
+    align-items:center;
     justify-content:space-between;
     padding:14px 18px;
-    border-radius:8px;
+    transition:0.2s;
     cursor:pointer;
+    border-radius:8px;
 }
 
 .repo-row:hover{
@@ -240,18 +246,47 @@ pre{
 
 .repo-left{
     display:flex;
+    align-items:center;
     gap:12px;
+    font-size:15px;
+}
+
+.repo-icon{
+    font-size:18px;
 }
 
 .repo-name{
     color:#58a6ff;
 }
 
-/* LIGHT */
+.repo-right{
+    display:flex;
+    align-items:center;
+    gap:35px;
+    font-size:13px;
+    color:#8b949e;
+}
+
+/* ================= MARKDOWN ================= */
+
+.markdown{
+    max-width:1200px;
+    line-height:1.8;
+}
+
+.markdown h1{
+    margin-bottom:10px;
+}
+
+.markdown p{
+    margin-bottom:20px;
+}
+
+/* ================= LIGHT MODE ================= */
 
 .light{
-    background:white;
-    color:black;
+    background:#ffffff;
+    color:#111;
 }
 
 .light .topbar,
@@ -259,7 +294,7 @@ pre{
 .light .file-header,
 .light .login-box{
     background:#f5f5f5;
-    color:black;
+    color:#111;
 }
 
 .light .search input,
@@ -268,13 +303,49 @@ pre{
     color:black;
 }
 
-</style>
+.light .file-item:hover{
+    background:#e5e5e5;
+}
 
+.light .file-item.active{
+    background:#dcdcdc;
+}
+
+.light .repo-row:hover{
+    background:#f0f0f0;
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:768px){
+
+    .sidebar{
+        width:180px;
+    }
+
+    .logo{
+        display:none;
+    }
+
+    .repo-right{
+        gap:15px;
+        font-size:11px;
+    }
+
+    .file-header{
+        flex-direction:column;
+        height:auto;
+        padding:10px;
+        gap:10px;
+    }
+}
+
+</style>
 </head>
 
 <body>
 
-<!-- LOGIN -->
+<!-- ================= LOGIN ================= -->
 
 <div id="loginPage">
 
@@ -282,9 +353,11 @@ pre{
 
         <h1>Mini GitHub</h1>
 
-        <input type="password"
-               id="password"
-               placeholder="Password">
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+        >
 
         <button onclick="login()">
             Login
@@ -298,7 +371,7 @@ pre{
 
 </div>
 
-<!-- APP -->
+<!-- ================= APP ================= -->
 
 <div id="app">
 
@@ -312,10 +385,12 @@ pre{
 
         <div class="search">
 
-            <input type="text"
-                   id="searchInput"
-                   placeholder="Search file..."
-                   onkeyup="filterFiles()">
+            <input
+                type="text"
+                id="searchInput"
+                placeholder="Search file..."
+                onkeyup="filterFiles()"
+            >
 
         </div>
 
@@ -395,7 +470,7 @@ pre{
 
 <script>
 
-/* CONFIG */
+/* ================= CONFIG ================= */
 
 const PASSWORD = "12345678";
 
@@ -405,7 +480,7 @@ const REPO_NAME = "code";
 
 const BRANCH = "main";
 
-/* FILES */
+/* ================= FILES ================= */
 
 const files = [
 
@@ -423,19 +498,11 @@ const files = [
     type:"Header",
     modified:"2026-05-25",
     version:"v1.1"
-},
-
-{
-    name:"HPGe.c",
-    folder:"HPGe",
-    type:"C Source",
-    modified:"2026-05-28",
-    version:"v1.0"
 }
 
 ];
 
-/* GLOBAL */
+/* ================= GLOBAL ================= */
 
 let allFiles = [];
 
@@ -443,7 +510,7 @@ let currentText = "";
 
 let currentRawUrl = "";
 
-/* LOGIN */
+/* ================= LOGIN ================= */
 
 function login(){
 
@@ -467,7 +534,7 @@ function login(){
     }
 }
 
-/* INIT FILES */
+/* ================= INIT FILES ================= */
 
 function initFiles(){
 
@@ -476,7 +543,7 @@ function initFiles(){
         ...file,
 
         download_url:
-`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${file.folder}/${file.name}`
+`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${file.name}`
 
     }));
 
@@ -485,7 +552,7 @@ function initFiles(){
     showHomePage();
 }
 
-/* HOMEPAGE */
+/* ================= HOMEPAGE ================= */
 
 function showHomePage(){
 
@@ -511,35 +578,54 @@ function showHomePage(){
 
     viewer.innerHTML = `
 
-<div class="markdown">
+    <div class="markdown">
 
-    <h1>Repository Files</h1>
+        <div class="repo-list">
 
-    ${allFiles.map(file => `
+            ${allFiles.map(file => `
 
-    <div class="repo-row"
-         onclick="openFileByName('${file.name}')">
+            <div class="repo-row"
+                 onclick="openFileByName('${file.name}')">
 
-        <div class="repo-left">
+                <div class="repo-left">
 
-            <span>📄</span>
+                    <span class="repo-icon">
+                        📄
+                    </span>
 
-            <span class="repo-name">
-                ${file.folder}/${file.name}
-            </span>
+                    <span class="repo-name">
+                        ${file.name}
+                    </span>
+
+                </div>
+
+                <div class="repo-right">
+
+                    <span>
+                        ${file.type}
+                    </span>
+
+                    <span>
+                        ${file.modified}
+                    </span>
+
+                    <span>
+                        ${file.version}
+                    </span>
+
+                </div>
+
+            </div>
+
+            `).join("")}
 
         </div>
 
     </div>
-
-    `).join("")}
-
-</div>
-
-`;
+    `;
 }
 
-/* RENDER FILES */
+/* ================= RENDER FILES ================= */
 
 function renderFiles(files){
 
@@ -548,58 +634,33 @@ function renderFiles(files){
 
     list.innerHTML = "";
 
-    const folders = {};
-
     files.forEach(file => {
 
-        if(!folders[file.folder]){
-
-            folders[file.folder] = [];
-        }
-
-        folders[file.folder].push(file);
-    });
-
-    for(const folder in folders){
-
-        const folderDiv =
+        const div =
             document.createElement("div");
 
-        folderDiv.className =
-            "folder-title";
+        div.className = "file-item";
 
-        folderDiv.innerHTML =
-            `📁 ${folder}`;
+        div.innerHTML = `
+            📄 ${file.name}
+        `;
 
-        list.appendChild(folderDiv);
+        div.onclick = () => {
 
-        folders[folder].forEach(file => {
+            document.querySelectorAll(".file-item")
+                .forEach(x =>
+                    x.classList.remove("active"));
 
-            const div =
-                document.createElement("div");
+            div.classList.add("active");
 
-            div.className = "file-item";
+            openFile(file);
+        };
 
-            div.innerHTML =
-                `📄 ${file.name}`;
-
-            div.onclick = () => {
-
-                document.querySelectorAll(".file-item")
-                    .forEach(x =>
-                        x.classList.remove("active"));
-
-                div.classList.add("active");
-
-                openFile(file);
-            };
-
-            list.appendChild(div);
-        });
-    }
+        list.appendChild(div);
+    });
 }
 
-/* SEARCH */
+/* ================= SEARCH ================= */
 
 function filterFiles(){
 
@@ -616,7 +677,7 @@ function filterFiles(){
     renderFiles(filtered);
 }
 
-/* OPEN BY NAME */
+/* ================= OPEN BY NAME ================= */
 
 function openFileByName(name){
 
@@ -629,7 +690,7 @@ function openFileByName(name){
     }
 }
 
-/* OPEN FILE */
+/* ================= OPEN FILE ================= */
 
 async function openFile(file){
 
@@ -642,8 +703,7 @@ async function openFile(file){
     document.getElementById("currentFile")
         .innerText = file.name;
 
-    currentRawUrl =
-        file.download_url;
+    currentRawUrl = file.download_url;
 
     try{
 
@@ -658,17 +718,37 @@ async function openFile(file){
         const viewer =
             document.getElementById("viewer");
 
-        viewer.innerHTML = `
+        if(file.name.toLowerCase().endsWith(".md")){
+
+            viewer.innerHTML =
+                `<div class="markdown">
+                    ${marked.parse(text)}
+                </div>`;
+        }
+
+        else{
+
+            viewer.innerHTML = `
 
 <div class="markdown">
 
-<h2>${file.name}</h2>
+    <h2>${file.name}</h2>
 
-<p>Folder: ${file.folder}</p>
+    <p>
+        Folder: ${file.folder}
+    </p>
 
-<p>Type: ${file.type}</p>
+    <p>
+        Modified: ${file.modified}
+    </p>
 
-<p>Version: ${file.version}</p>
+    <p>
+        Type: ${file.type}
+    </p>
+
+    <p>
+        Version: ${file.version}
+    </p>
 
 </div>
 
@@ -680,7 +760,8 @@ ${escapeHtml(text)}
 
 `;
 
-        Prism.highlightAll();
+            Prism.highlightAll();
+        }
 
     }catch(err){
 
@@ -690,7 +771,7 @@ ${escapeHtml(text)}
     }
 }
 
-/* ESCAPE */
+/* ================= ESCAPE HTML ================= */
 
 function escapeHtml(text){
 
@@ -700,7 +781,7 @@ function escapeHtml(text){
         .replace(/>/g, "&gt;");
 }
 
-/* COPY */
+/* ================= COPY ================= */
 
 function copyCode(){
 
@@ -711,13 +792,12 @@ function copyCode(){
         return;
     }
 
-    navigator.clipboard
-        .writeText(currentText);
+    navigator.clipboard.writeText(currentText);
 
     alert("Copied!");
 }
 
-/* DOWNLOAD */
+/* ================= DOWNLOAD ================= */
 
 function downloadFile(){
 
@@ -728,18 +808,40 @@ function downloadFile(){
         return;
     }
 
-    window.open(currentRawUrl);
+    fetch(currentRawUrl)
+        .then(response => response.blob())
+        .then(blob => {
+
+            const blobUrl =
+                window.URL.createObjectURL(blob);
+
+            const a =
+                document.createElement("a");
+
+            a.href = blobUrl;
+
+            a.download =
+                document.getElementById("currentFile")
+                .innerText;
+
+            document.body.appendChild(a);
+
+            a.click();
+
+            a.remove();
+
+            window.URL.revokeObjectURL(blobUrl);
+        });
 }
 
-/* THEME */
+/* ================= THEME ================= */
 
 function toggleTheme(){
 
-    document.body
-        .classList.toggle("light");
+    document.body.classList.toggle("light");
 }
 
-/* RESIZE */
+/* ================= RESIZE ================= */
 
 const resizer =
     document.getElementById("resizer");
@@ -752,19 +854,28 @@ let isResizing = false;
 resizer.addEventListener("mousedown", () => {
 
     isResizing = true;
+
+    document.body.style.cursor = "col-resize";
 });
 
 document.addEventListener("mousemove", (e) => {
 
     if(!isResizing) return;
 
-    sidebar.style.width =
-        e.clientX + "px";
+    let width = e.clientX;
+
+    if(width < 100) width = 100;
+
+    if(width > 900) width = 900;
+
+    sidebar.style.width = width + "px";
 });
 
 document.addEventListener("mouseup", () => {
 
     isResizing = false;
+
+    document.body.style.cursor = "default";
 });
 
 </script>
