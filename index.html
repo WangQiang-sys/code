@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Mini GitHub Viewer</title>
 
 <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet"/>
@@ -93,7 +92,6 @@ body{
 .content{flex:1;overflow:auto;padding:20px;}
 </style>
 </head>
-
 <body>
 
 <!-- LOGIN -->
@@ -116,7 +114,6 @@ body{
     </div>
 
     <div class="container">
-
         <div class="sidebar">
             <div id="fileList"></div>
         </div>
@@ -124,7 +121,6 @@ body{
         <div class="resizer" id="resizer"></div>
 
         <div class="main">
-
             <div class="file-header">
                 <div id="currentFile">Repository Overview</div>
                 <div class="file-actions">
@@ -137,9 +133,7 @@ body{
             <div class="content">
                 <div id="viewer"></div>
             </div>
-
         </div>
-
     </div>
 </div>
 
@@ -167,13 +161,18 @@ function login(){
     if(pwd === PASSWORD){
         document.getElementById("loginPage").style.display="none";
         document.getElementById("app").style.display="flex";
-        showHomePage();
+        initFiles();
     }else{
         document.getElementById("error").innerText="Wrong Password";
     }
 }
 
-/* ================= TREE BUILD ================= */
+/* ================= INIT ================= */
+function initFiles(){
+    showHomePage();
+}
+
+/* ================= BUILD TREE ================= */
 function buildTree(){
     const map = {};
     files.forEach(f=>{
@@ -194,12 +193,15 @@ function renderTree(tree, container){
             div.className="file-item";
             const open = folderState[item.name];
             div.innerHTML=open?`📂 ${item.name}`:`📁 ${item.name}`;
-            div.onclick=()=>{folderState[item.name]=!folderState[item.name];showHomePage();}
+            div.onclick=()=>{
+                folderState[item.name]=!folderState[item.name];
+                showHomePage();
+            };
             container.appendChild(div);
             if(open){
                 const sub=document.createElement("div");
                 sub.style.paddingLeft="18px";
-                renderTree(item.children,sub);
+                renderTree(item.children, sub);
                 container.appendChild(sub);
             }
         }else{
@@ -215,9 +217,10 @@ function renderTree(tree, container){
 /* ================= HOME ================= */
 function showHomePage(){
     const tree = buildTree();
-    renderTree(tree,document.getElementById("fileList"));
-    // 初始不显示分割线
-    document.getElementById("currentFile").innerText="Repository Overview";
+    const list = document.getElementById("fileList");
+    if(!list) return;
+    renderTree(tree, list);
+    document.getElementById("currentFile").innerText = "Repository Overview";
     currentText="";
     currentRawUrl="";
     document.getElementById("viewer").innerHTML="";
@@ -233,11 +236,13 @@ async function openFile(file){
         const text=await res.text();
         currentText=text;
         document.getElementById("viewer").innerHTML=`<pre><code>${escapeHtml(text)}</code></pre>`;
-    }catch(e){document.getElementById("viewer").innerHTML="Load Failed";}
+    }catch(e){
+        document.getElementById("viewer").innerHTML="Load Failed";
+    }
 }
 
 function escapeHtml(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function copyCode(){if(!currentText){alert("No file opened");return;}navigator.clipboard.writeText(currentText);alert("Copied!");}
 function downloadFile(){if(!currentRawUrl){alert("No file opened");return;}fetch(currentRawUrl).then(r=>r.blob()).then(b=>{const url=URL.createObjectURL(b);const a=document.createElement("a");a.href=url;a.download=document.getElementById("currentFile").innerText;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);});}
 function toggleTheme(){document.body.classList.toggle("light");}
-function filterFiles(){const key=document.getElementById("searchInput").value.toLowerCase();const filtered=files.filter(f=>f.name.toLowerCase().includes(key));
+function filterFiles(){const key=document.getElementById("searchInput").value.toLowerCase();const filtered=files.filter(f=>f.name.toLowerCase().includes(key));const map={};filtered.forEach(f=>{if(!map[f.folder]) map[f.folder]={name:f.folder,type:"folder",children:[]}; map[f.folder].children.push(f);});renderTree(Object.values(map), document.getElementById("fileList"))
