@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Mini GitHub C Viewer</title>
+<title>Mini GitHub Viewer</title>
 
-<!-- Prism.js -->
+<!-- Prism -->
 <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet"/>
 
 <style>
@@ -210,15 +210,16 @@ body{
 /* ================= CODE ================= */
 
 pre{
-    font-size:8px;
-    line-height:1.0;
+    font-size:14px;
+    line-height:1.5;
     border-radius:7px;
+    overflow:auto;
 }
 
 /* ================= MARKDOWN ================= */
 
 .markdown{
-    max-width:1000px;
+    max-width:1200px;
     line-height:1.8;
 }
 
@@ -237,6 +238,29 @@ pre{
     background:#21262d;
     padding:2px 6px;
     border-radius:4px;
+}
+
+/* ================= TABLE ================= */
+
+.info-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+.info-table th,
+.info-table td{
+    border:1px solid #30363d;
+    padding:12px;
+    text-align:left;
+}
+
+.info-table th{
+    background:#21262d;
+}
+
+.info-table tr:hover{
+    background:#161b22;
 }
 
 /* ================= LIGHT MODE ================= */
@@ -266,6 +290,14 @@ pre{
 
 .light .file-item.active{
     background:#dcdcdc;
+}
+
+.light .info-table th{
+    background:#e5e5e5;
+}
+
+.light .info-table tr:hover{
+    background:#f5f5f5;
 }
 
 /* ================= MOBILE ================= */
@@ -301,11 +333,17 @@ pre{
 
         <h1>Mini GitHub</h1>
 
-        <input type="password" id="password" placeholder="Password">
+        <input type="password"
+               id="password"
+               placeholder="Password">
 
-        <button onclick="login()">Login</button>
+        <button onclick="login()">
+            Login
+        </button>
 
-        <p id="error" style="color:red;margin-top:10px;"></p>
+        <p id="error"
+           style="color:red;margin-top:10px;">
+        </p>
 
     </div>
 
@@ -315,22 +353,27 @@ pre{
 
 <div id="app">
 
-    <!-- top -->
+    <!-- topbar -->
 
     <div class="topbar">
 
-        <div class="logo">Mini GitHub</div>
+        <div class="logo">
+            Mini GitHub
+        </div>
 
         <div class="search">
+
             <input
                 type="text"
                 id="searchInput"
                 placeholder="Search file..."
                 onkeyup="filterFiles()"
             >
+
         </div>
 
-        <button class="theme-btn" onclick="toggleTheme()">
+        <button class="theme-btn"
+                onclick="toggleTheme()">
             Theme
         </button>
 
@@ -348,9 +391,10 @@ pre{
 
         </div>
 
-        <!-- resizer -->
+        <!-- resize -->
 
-        <div class="resizer" id="resizer"></div>
+        <div class="resizer"
+             id="resizer"></div>
 
         <!-- content -->
 
@@ -359,7 +403,7 @@ pre{
             <div class="file-header">
 
                 <div id="currentFile">
-                    No file selected
+                    Repository Overview
                 </div>
 
                 <div class="file-actions">
@@ -411,9 +455,21 @@ const BRANCH = "main";
 
 const files = [
 
-    "Calculated_Irradiation_Time.c",
+{
+    name:"Calculated_Irradiation_Time.c",
+    folder:"src",
+    type:"C Source",
+    modified:"2026-05-28",
+    version:"v2.3"
+},
 
-    "test.h"
+{
+    name:"test.h",
+    folder:"include",
+    type:"Header",
+    modified:"2026-05-25",
+    version:"v1.1"
+}
 
 ];
 
@@ -453,22 +509,69 @@ function login(){
 
 function initFiles(){
 
-    allFiles = files.map(name => ({
+    allFiles = files.map(file => ({
 
-        name: name,
+        ...file,
 
         download_url:
-`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${name}`
+`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${file.name}`
 
     }));
 
     renderFiles(allFiles);
 
-    // 自动打开第一个文件
-    if(allFiles.length > 0){
+    showHomePage();
+}
 
-        openFile(allFiles[0]);
-    }
+/* ================= HOMEPAGE ================= */
+
+function showHomePage(){
+
+    const viewer =
+        document.getElementById("viewer");
+
+    viewer.innerHTML = `
+
+    <div class="markdown">
+
+        <h1>Repository Overview</h1>
+
+        <p>
+            Welcome to Mini GitHub Viewer.
+        </p>
+
+        <table class="info-table">
+
+            <tr>
+                <th>File</th>
+                <th>Folder</th>
+                <th>Modified</th>
+                <th>Type</th>
+                <th>Version</th>
+            </tr>
+
+            ${allFiles.map(file => `
+
+            <tr>
+
+                <td>${file.name}</td>
+
+                <td>${file.folder}</td>
+
+                <td>${file.modified}</td>
+
+                <td>${file.type}</td>
+
+                <td>${file.version}</td>
+
+            </tr>
+
+            `).join("")}
+
+        </table>
+
+    </div>
+    `;
 }
 
 /* ================= RENDER FILES ================= */
@@ -547,16 +650,46 @@ async function openFile(file){
         if(file.name.toLowerCase().endsWith(".md")){
 
             viewer.innerHTML =
-                `<div class="markdown">${marked.parse(text)}</div>`;
+                `<div class="markdown">
+                    ${marked.parse(text)}
+                </div>`;
         }
 
-        /* c/h */
+        /* code */
 
         else{
 
             viewer.innerHTML =
 
-`<pre><code class="language-c">${escapeHtml(text)}</code></pre>`;
+`
+<div class="markdown">
+
+    <h2>${file.name}</h2>
+
+    <p>
+        Folder: ${file.folder}
+    </p>
+
+    <p>
+        Modified: ${file.modified}
+    </p>
+
+    <p>
+        Type: ${file.type}
+    </p>
+
+    <p>
+        Version: ${file.version}
+    </p>
+
+</div>
+
+<pre>
+<code class="language-c">
+${escapeHtml(text)}
+</code>
+</pre>
+`;
 
             Prism.highlightAll();
         }
@@ -569,7 +702,7 @@ async function openFile(file){
     }
 }
 
-/* ================= ESCAPE HTML ================= */
+/* ================= ESCAPE ================= */
 
 function escapeHtml(text){
 
@@ -583,6 +716,13 @@ function escapeHtml(text){
 
 function copyCode(){
 
+    if(!currentText){
+
+        alert("No file opened");
+
+        return;
+    }
+
     navigator.clipboard.writeText(currentText);
 
     alert("Copied!");
@@ -592,7 +732,12 @@ function copyCode(){
 
 function downloadFile(){
 
-    if(!currentRawUrl) return;
+    if(!currentRawUrl){
+
+        alert("No file opened");
+
+        return;
+    }
 
     fetch(currentRawUrl)
         .then(response => response.blob())
