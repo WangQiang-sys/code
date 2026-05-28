@@ -204,6 +204,10 @@ body{
     cursor:pointer;
 }
 
+.file-actions button:hover{
+    background:#2ea043;
+}
+
 .content{
     flex:1;
     overflow:auto;
@@ -426,6 +430,10 @@ pre{
 
                 <div class="file-actions">
 
+                    <button onclick="showHomePage()">
+                        Home
+                    </button>
+
                     <button onclick="copyCode()">
                         Copy
                     </button>
@@ -438,7 +446,7 @@ pre{
 
             </div>
 
-            <div class="content" id="mainContent">
+            <div class="content">
 
                 <div id="viewer"></div>
 
@@ -548,6 +556,10 @@ function initFiles(){
 
 function showHomePage(){
 
+    document.querySelectorAll(".file-item")
+        .forEach(x =>
+            x.classList.remove("active"));
+
     document.querySelector(".sidebar")
         .style.display = "none";
 
@@ -556,6 +568,10 @@ function showHomePage(){
 
     document.getElementById("currentFile")
         .innerText = "Repository Overview";
+
+    currentText = "";
+
+    currentRawUrl = "";
 
     const viewer =
         document.getElementById("viewer");
