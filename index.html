@@ -103,7 +103,7 @@ body{
     overflow:auto;
 }
 
-/* ===== DRAG BAR ===== */
+/* DRAG BAR */
 .resizer{
     width:6px;
     cursor:col-resize;
@@ -115,10 +115,15 @@ body{
     background:#238636;
 }
 
-/* FILE ITEM */
+/* ===== FILE ITEM（关键优化在这里） ===== */
 .file-item{
     padding:12px;
     cursor:pointer;
+
+    /* ⭐ 新增：防止撑爆 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .file-item:hover{background:#21262d;}
@@ -390,7 +395,6 @@ document.addEventListener("mousemove", (e) => {
     const rect = container.getBoundingClientRect();
     let newWidth = e.clientX - rect.left;
 
-    // ✔ 更自由范围（几乎全屏）
     const min = 80;
     const max = rect.width - 80;
 
