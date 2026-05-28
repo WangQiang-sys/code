@@ -9,6 +9,7 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
+
 body{
     background:#0d1117;
     color:#c9d1d9;
@@ -24,12 +25,14 @@ body{
     align-items:center;
     height:100vh;
 }
+
 .login-box{
     width:320px;
     background:#161b22;
     padding:40px;
     border-radius:12px;
 }
+
 .login-box input{
     width:100%;
     padding:12px;
@@ -39,6 +42,7 @@ body{
     border:1px solid #30363d;
     border-radius:6px;
 }
+
 .login-box button{
     width:100%;
     padding:12px;
@@ -49,8 +53,13 @@ body{
 }
 
 /* ===== APP ===== */
-#app{display:none;height:100vh;flex-direction:column;}
+#app{
+    display:none;
+    height:100vh;
+    flex-direction:column;
+}
 
+/* TOP BAR */
 .topbar{
     height:55px;
     background:#161b22;
@@ -59,6 +68,7 @@ body{
     padding:0 15px;
     gap:15px;
 }
+
 .topbar .logo{font-weight:bold;}
 
 .topbar input{
@@ -69,6 +79,7 @@ body{
     border:1px solid #30363d;
     border-radius:6px;
 }
+
 .topbar button{
     padding:8px 14px;
     border:none;
@@ -84,7 +95,7 @@ body{
     height:100%;
 }
 
-/* sidebar */
+/* LEFT SIDEBAR */
 .sidebar{
     width:280px;
     background:#161b22;
@@ -92,24 +103,28 @@ body{
     overflow:auto;
 }
 
-/* 🔥 resizer */
+/* ===== DRAG BAR ===== */
 .resizer{
-    width:5px;
+    width:6px;
     cursor:col-resize;
     background:#30363d;
+    transition:0.2s;
 }
+
 .resizer:hover{
     background:#238636;
 }
 
+/* FILE ITEM */
 .file-item{
     padding:12px;
     cursor:pointer;
 }
+
 .file-item:hover{background:#21262d;}
 .file-item.active{background:#30363d;}
 
-/* main */
+/* RIGHT PANEL */
 .main{
     flex:1;
     display:flex;
@@ -220,7 +235,7 @@ let folderState = {};
 let currentText = "";
 let currentRawUrl = "";
 
-/* ================= LOGIN ================= */
+/* ===== LOGIN ===== */
 function login(){
     const pwd = document.getElementById("password").value;
     if(pwd === PASSWORD){
@@ -232,7 +247,7 @@ function login(){
     }
 }
 
-/* ================= TREE ================= */
+/* ===== TREE ===== */
 function buildTree(list = files){
     const map = {};
     list.forEach(f=>{
@@ -279,7 +294,7 @@ function renderTree(tree, container){
     });
 }
 
-/* ================= HOME ================= */
+/* ===== HOME ===== */
 function showHomePage(){
     const tree = buildTree(files);
     renderTree(tree, document.getElementById("fileList"));
@@ -290,7 +305,7 @@ function showHomePage(){
     currentRawUrl="";
 }
 
-/* ================= OPEN FILE ================= */
+/* ===== OPEN FILE ===== */
 async function openFile(file){
 
     document.getElementById("currentFile").innerText=file.name;
@@ -316,7 +331,7 @@ async function openFile(file){
     }
 }
 
-/* ================= SEARCH ================= */
+/* ===== SEARCH ===== */
 function filterFiles(){
     const key=document.getElementById("searchInput").value.toLowerCase();
     const filtered=files.filter(f=>f.name.toLowerCase().includes(key));
@@ -324,14 +339,14 @@ function filterFiles(){
     renderTree(tree, document.getElementById("fileList"));
 }
 
-/* ================= COPY ================= */
+/* ===== COPY ===== */
 function copyCode(){
     if(!currentText) return alert("No file opened");
     navigator.clipboard.writeText(currentText);
     alert("Copied!");
 }
 
-/* ================= DOWNLOAD ================= */
+/* ===== DOWNLOAD ===== */
 function downloadFile(){
     if(!currentRawUrl) return alert("No file opened");
 
@@ -349,36 +364,46 @@ function downloadFile(){
         });
 }
 
-/* ================= UTIL ================= */
+/* ===== UTIL ===== */
 function escapeHtml(t){
     return t.replace(/&/g,"&amp;")
             .replace(/</g,"&lt;")
             .replace(/>/g,"&gt;");
 }
 
-/* ================= RESIZER ================= */
+/* ===== FULL RANGE RESIZER ===== */
 const sidebar = document.getElementById("sidebar");
 const resizer = document.getElementById("resizer");
+const container = document.querySelector(".container");
 
 let isDragging = false;
 
-resizer.addEventListener("mousedown", function(){
+resizer.addEventListener("mousedown", () => {
     isDragging = true;
     document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
 });
 
-document.addEventListener("mousemove", function(e){
-    if(!isDragging) return;
+document.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
 
-    const newWidth = e.clientX;
-    if(newWidth < 150 || newWidth > 600) return;
+    const rect = container.getBoundingClientRect();
+    let newWidth = e.clientX - rect.left;
+
+    // ✔ 更自由范围（几乎全屏）
+    const min = 120;
+    const max = rect.width - 120;
+
+    if (newWidth < min) newWidth = min;
+    if (newWidth > max) newWidth = max;
 
     sidebar.style.width = newWidth + "px";
 });
 
-document.addEventListener("mouseup", function(){
+document.addEventListener("mouseup", () => {
     isDragging = false;
     document.body.style.cursor = "default";
+    document.body.style.userSelect = "auto";
 });
 
 </script>
