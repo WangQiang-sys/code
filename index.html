@@ -3,354 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini GitHub Viewer - 文件夹折叠</title>
+
+<title>Mini GitHub Viewer</title>
+
 <!-- Prism -->
 <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet"/>
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
 
-body{
-    background:#0d1117;
-    color:#c9d1d9;
-    font-family:Consolas, monospace;
-    height:100vh;
-    overflow:hidden;
-}
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0d1117;color:#c9d1d9;font-family:Consolas, monospace;height:100vh;overflow:hidden;}
 
 /* ================= LOGIN ================= */
-#loginPage{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-}
-
-.login-box{
-    width:320px;
-    background:#161b22;
-    padding:40px;
-    border-radius:12px;
-    box-shadow:0 0 20px rgba(0,0,0,0.5);
-}
-
-.login-box h1{
-    text-align:center;
-    margin-bottom:25px;
-}
-
-.login-box input{
-    width:100%;
-    padding:12px;
-    margin-bottom:15px;
-    border:none;
-    outline:none;
-    background:#0d1117;
-    color:white;
-    border:1px solid #30363d;
-    border-radius:6px;
-}
-
-.login-box button{
-    width:100%;
-    padding:12px;
-    border:none;
-    background:#238636;
-    color:white;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:16px;
-}
-
-.login-box button:hover{
-    background:#2ea043;
-}
+#loginPage{display:flex;justify-content:center;align-items:center;height:100vh;}
+.login-box{width:320px;background:#161b22;padding:40px;border-radius:12px;box-shadow:0 0 20px rgba(0,0,0,0.5);}
+.login-box h1{text-align:center;margin-bottom:25px;}
+.login-box input{width:100%;padding:12px;margin-bottom:15px;border:none;outline:none;background:#0d1117;color:white;border:1px solid #30363d;border-radius:6px;}
+.login-box button{width:100%;padding:12px;border:none;background:#238636;color:white;border-radius:6px;cursor:pointer;font-size:16px;}
+.login-box button:hover{background:#2ea043;}
 
 /* ================= APP ================= */
-#app{
-    display:none;
-    height:100vh;
-    flex-direction:column;
-}
+#app{display:none;height:100vh;flex-direction:column;}
 
 /* ================= TOPBAR ================= */
-.topbar{
-    height:55px;
-    background:#161b22;
-    border-bottom:1px solid #30363d;
-    display:flex;
-    align-items:center;
-    padding:0 15px;
-    gap:15px;
-}
-
-.logo{
-    font-size:20px;
-    font-weight:bold;
-}
-
-.search{
-    flex:1;
-}
-
-.search input{
-    width:100%;
-    padding:10px;
-    background:#0d1117;
-    border:1px solid #30363d;
-    color:white;
-    border-radius:6px;
-}
-
-.theme-btn{
-    padding:8px 14px;
-    border:none;
-    background:#21262d;
-    color:white;
-    border-radius:6px;
-    cursor:pointer;
-}
+.topbar{height:55px;background:#161b22;border-bottom:1px solid #30363d;display:flex;align-items:center;padding:0 15px;gap:15px;}
+.logo{font-size:20px;font-weight:bold;}
+.search{flex:1;}
+.search input{width:100%;padding:10px;background:#0d1117;border:1px solid #30363d;color:white;border-radius:6px;}
+.theme-btn{padding:8px 14px;border:none;background:#21262d;color:white;border-radius:6px;cursor:pointer;}
 
 /* ================= MAIN ================= */
-.container{
-    flex:1;
-    display:flex;
-    overflow:hidden;
-}
+.container{flex:1;display:flex;overflow:hidden;}
 
-/* ================= SIDEBAR (文件夹树) ================= */
-.sidebar{
-    width:280px;
-    min-width:180px;
-    max-width:600px;
-    background:#161b22;
-    border-right:1px solid #30363d;
-    overflow:auto;
-    display:none;
-    user-select:none;
-}
-
-/* 文件夹树样式 */
-.tree-node {
-    list-style: none;
-    padding-left: 0;
-    margin: 0;
-}
-
-.tree-item {
-    cursor: pointer;
-    padding: 6px 8px 6px 0;
-    font-size: 13px;
-    transition: 0.1s;
-    white-space: nowrap;
-}
-
-.tree-item-content {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 8px;
-    border-radius: 6px;
-}
-
-.tree-item-content:hover {
-    background: #21262d;
-}
-
-.tree-item-content.active {
-    background: #30363d;
-}
-
-.folder-arrow {
-    font-size: 12px;
-    width: 18px;
-    display: inline-block;
-    text-align: center;
-    transition: transform 0.1s;
-}
-
-.folder-arrow.open {
-    transform: rotate(90deg);
-}
-
-.folder-icon, .file-icon {
-    font-size: 14px;
-    width: 20px;
-}
-
-.file-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.children-wrapper {
-    padding-left: 24px;
-    display: block;
-}
-
-.children-wrapper.collapsed {
-    display: none;
-}
+/* ================= SIDEBAR ================= */
+.sidebar{width:280px;min-width:180px;max-width:600px;background:#161b22;border-right:1px solid #30363d;overflow:auto;display:none;}
+.file-item{padding:12px 15px;cursor:pointer;transition:0.2s;}
+.file-item:hover{background:#21262d;}
+.file-item.active{background:#30363d;}
 
 /* ================= RESIZER ================= */
-.resizer{
-    width:5px;
-    background:#30363d;
-    cursor:col-resize;
-    transition:0.2s;
-    display:none;
-}
-.resizer:hover{
-    background:#58a6ff;
-}
+.resizer{width:5px;background:#30363d;cursor:col-resize;transition:0.2s;display:none;}
+.resizer:hover{background:#58a6ff;}
 
 /* ================= CONTENT ================= */
-.main{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.file-header{height:55px;background:#161b22;border-bottom:1px solid #30363d;display:flex;justify-content:space-between;align-items:center;padding:0 20px;}
+.file-actions{display:flex;gap:10px;}
+.file-actions button{padding:8px 12px;border:none;background:#238636;color:white;border-radius:6px;cursor:pointer;}
+.file-actions button:hover{background:#2ea043;}
+.content{flex:1;overflow:auto;padding:20px;width:100%;}
 
-.file-header{
-    height:55px;
-    background:#161b22;
-    border-bottom:1px solid #30363d;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:0 20px;
-}
+/* ================= CODE ================= */
+pre{font-size:14px;line-height:1.5;border-radius:7px;overflow:auto;}
 
-.file-actions{
-    display:flex;
-    gap:10px;
-}
+/* ================= REPOSITORY LIST ================= */
+.repo-list{margin-top:20px;}
+.repo-row{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;transition:0.2s;cursor:pointer;border-radius:8px;}
+.repo-row:hover{background:#161b22;}
+.repo-left{display:flex;align-items:center;gap:12px;font-size:15px;}
+.repo-icon{font-size:18px;}
+.repo-name{color:#58a6ff;}
+.repo-right{display:flex;align-items:center;gap:35px;font-size:13px;color:#8b949e;}
 
-.file-actions button{
-    padding:8px 12px;
-    border:none;
-    background:#238636;
-    color:white;
-    border-radius:6px;
-    cursor:pointer;
-}
-.file-actions button:hover{
-    background:#2ea043;
-}
-
-.content{
-    flex:1;
-    overflow:auto;
-    padding:20px;
-    width:100%;
-}
-
-pre{
-    font-size:14px;
-    line-height:1.5;
-    border-radius:7px;
-    overflow:auto;
-}
-
-/* ================= REPOSITORY LIST (首页卡片) ================= */
-.repo-list{
-    margin-top:20px;
-}
-.repo-row{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:14px 18px;
-    transition:0.2s;
-    cursor:pointer;
-    border-radius:8px;
-}
-.repo-row:hover{
-    background:#161b22;
-}
-.repo-left{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    font-size:15px;
-}
-.repo-icon{
-    font-size:18px;
-}
-.repo-name{
-    color:#58a6ff;
-}
-.repo-right{
-    display:flex;
-    align-items:center;
-    gap:35px;
-    font-size:13px;
-    color:#8b949e;
-}
-
-.markdown{
-    max-width:1200px;
-    line-height:1.8;
-}
-.markdown h1{
-    margin-bottom:10px;
-}
-.markdown p{
-    margin-bottom:20px;
-}
+/* ================= MARKDOWN ================= */
+.markdown{max-width:1200px;line-height:1.8;}
+.markdown h1{margin-bottom:10px;}
+.markdown p{margin-bottom:20px;}
 
 /* ================= LIGHT MODE ================= */
-.light{
-    background:#ffffff;
-    color:#111;
-}
-.light .topbar,
-.light .sidebar,
-.light .file-header,
-.light .login-box{
-    background:#f5f5f5;
-    color:#111;
-}
-.light .search input,
-.light .login-box input{
-    background:white;
-    color:black;
-}
-.light .tree-item-content:hover{
-    background:#e5e5e5;
-}
-.light .tree-item-content.active{
-    background:#dcdcdc;
-}
-.light .repo-row:hover{
-    background:#f0f0f0;
-}
+.light{background:#ffffff;color:#111;}
+.light .topbar,.light .sidebar,.light .file-header,.light .login-box{background:#f5f5f5;color:#111;}
+.light .search input,.light .login-box input{background:white;color:black;}
+.light .file-item:hover{background:#e5e5e5;}
+.light .file-item.active{background:#dcdcdc;}
+.light .repo-row:hover{background:#f0f0f0;}
 
 /* ================= MOBILE ================= */
 @media(max-width:768px){
-    .sidebar{
-        width:180px;
-    }
-    .logo{
-        display:none;
-    }
-    .repo-right{
-        gap:15px;
-        font-size:11px;
-    }
-    .file-header{
-        flex-direction:column;
-        height:auto;
-        padding:10px;
-        gap:10px;
-    }
+    .sidebar{width:180px;}
+    .logo{display:none;}
+    .repo-right{gap:15px;font-size:11px;}
+    .file-header{flex-direction:column;height:auto;padding:10px;gap:10px;}
 }
 </style>
 </head>
+
 <body>
 
 <!-- ================= LOGIN ================= -->
@@ -365,7 +101,6 @@ pre{
 
 <!-- ================= APP ================= -->
 <div id="app">
-    <!-- TOPBAR -->
     <div class="topbar">
         <div class="logo">Wang Qiang</div>
         <div class="search">
@@ -374,17 +109,11 @@ pre{
         <button class="theme-btn" onclick="toggleTheme()">Theme</button>
     </div>
 
-    <!-- MAIN -->
     <div class="container">
-        <!-- SIDEBAR 树形文件夹 -->
-        <div class="sidebar" id="sidebarTree">
-            <div id="fileTreeContainer"></div>
+        <div class="sidebar">
+            <div id="fileList"></div>
         </div>
-
-        <!-- RESIZER -->
         <div class="resizer" id="resizer"></div>
-
-        <!-- CONTENT -->
         <div class="main">
             <div class="file-header">
                 <div id="currentFile">Repository Overview</div>
@@ -401,7 +130,7 @@ pre{
     </div>
 </div>
 
-<!-- Prism & Markdown -->
+<!-- Prism -->
 <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-c.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -413,551 +142,67 @@ const GITHUB_USER = "WangQiang-sys";
 const REPO_NAME = "code";
 const BRANCH = "main";
 
-/* ================= 增强文件数据 (带层级路径) ================= */
-const files = [
-    { name: "Calculated_Irradiation_Time.c", folder: "src", type: "C Source", modified: "2026-05-28", version: "v2.3", fullPath: "src/Calculated_Irradiation_Time.c" },
-    { name: "test.h", folder: "include", type: "Header", modified: "2026-05-25", version: "v1.1", fullPath: "include/test.h" },
-    // 添加更多示例文件展示文件夹折叠，增加子目录深度
-    { name: "main.c", folder: "src/core", type: "C Source", modified: "2026-05-20", version: "v1.0", fullPath: "src/core/main.c" },
-    { name: "utils.c", folder: "src/utils", type: "C Source", modified: "2026-05-22", version: "v1.2", fullPath: "src/utils/utils.c" },
-    { name: "config.h", folder: "include/config", type: "Header", modified: "2026-05-18", version: "v0.9", fullPath: "include/config/config.h" },
-    { name: "README.md", folder: "", type: "Markdown", modified: "2026-05-28", version: "v1.0", fullPath: "README.md" },
-    { name: "docs/guide.md", folder: "docs", type: "Markdown", modified: "2026-05-15", version: "v1.0", fullPath: "docs/guide.md" }
+/* ================= FILE TREE ================= */
+const tree = [
+{
+    type: "file",
+    name: "Calculated_Irradiation_Time.c",
+    path: "Calculated_Irradiation_Time.c",
+    folder: "",
+    modified: "2026-05-28",
+    version: "v2.3"
+},
+{
+    type: "dir",
+    name: "HPGe",
+    path: "HPGe",
+    children: [
+        {
+            type: "file",
+            name: "r.c",
+            path: "HPGe/r.c",
+            modified: "2026-05-20",
+            version: "v1.0"
+        }
+    ]
+}
 ];
 
-/* ================= 全局变量 ================= */
-let allFiles = [];           // 存储扩展后的文件对象 (含download_url)
+/* ================= GLOBAL ================= */
 let currentText = "";
 let currentRawUrl = "";
-let currentActiveFile = null; // 当前打开的文件对象
+let historyStack = [];
 
-// 文件夹折叠状态存储: key为文件夹路径(如 "src", "src/core")，value为boolean (true展开 false折叠)
-let folderState = new Map();
-
-/* ================= 登录 ================= */
-function login() {
+/* ================= LOGIN ================= */
+function login(){
     const pwd = document.getElementById("password").value;
-    if (pwd === PASSWORD) {
+    if(pwd === PASSWORD){
         document.getElementById("loginPage").style.display = "none";
         document.getElementById("app").style.display = "flex";
         initFiles();
-    } else {
+    }else{
         document.getElementById("error").innerText = "Wrong Password";
     }
 }
 
-/* ================= 初始化文件 ================= */
-function initFiles() {
-    // 为每个文件生成完整raw url及显示路径
-    allFiles = files.map(file => ({
-        ...file,
-        download_url: `https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${file.fullPath}`,
-        // 用于在树中展示的名称
-        displayName: file.name
-    }));
-
-    // 默认展开根目录和第一层文件夹 (可选)
-    // 构建所有唯一文件夹路径，默认全部展开
-    const allFolders = new Set();
-    allFiles.forEach(f => {
-        const pathParts = getFolderParts(f.fullPath);
-        let cumulative = "";
-        for (let part of pathParts) {
-            cumulative = cumulative ? cumulative + "/" + part : part;
-            allFolders.add(cumulative);
-        }
-    });
-    // 默认展开所有文件夹
-    allFolders.forEach(folder => {
-        folderState.set(folder, true);
-    });
-    
-    renderFileTree();
+/* ================= INIT ================= */
+function initFiles(){
+    enrichTree(tree);
+    renderTree(tree);
     showHomePage();
 }
 
-/* 辅助: 从完整路径获取文件夹层级数组 (不包含文件名) */
-function getFolderParts(fullPath) {
-    const lastSlash = fullPath.lastIndexOf('/');
-    if (lastSlash === -1) return [];
-    const folderPath = fullPath.substring(0, lastSlash);
-    return folderPath ? folderPath.split('/') : [];
-}
-
-/* 构建树形结构: 返回根节点数组 */
-function buildTree(filesArray) {
-    const rootMap = new Map(); // key为路径前缀, value为节点
-    const rootChildren = [];   // 顶层节点 (文件或文件夹)
-    
-    // 先为所有文件建立节点记录
-    filesArray.forEach(file => {
-        const parts = file.fullPath.split('/');
-        const fileName = parts.pop();
-        const folderPath = parts.join('/');
-        
-        // 创建文件节点
-        const fileNode = {
-            type: 'file',
-            name: fileName,
-            fullPath: file.fullPath,
-            fileData: file,
-            children: null
-        };
-        
-        if (!folderPath) {
-            // 根目录文件
-            rootChildren.push(fileNode);
-        } else {
-            // 确保文件夹路径存在
-            ensureFolderPath(rootMap, folderPath, rootChildren);
-            const parentKey = folderPath;
-            const parentNode = rootMap.get(parentKey);
-            if (parentNode && parentNode.type === 'folder') {
-                parentNode.children.push(fileNode);
-            }
+/* ================= ENRICH URL ================= */
+function enrichTree(nodes){
+    nodes.forEach(n => {
+        if(n.type === "file"){
+            n.download_url = `https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${n.path}`;
         }
-    });
-    
-    // 整理并返回根children (排序: 文件夹在前, 文件在后)
-    function sortChildren(nodes) {
-        if (!nodes) return [];
-        nodes.sort((a, b) => {
-            if (a.type === 'folder' && b.type === 'file') return -1;
-            if (a.type === 'file' && b.type === 'folder') return 1;
-            return a.name.localeCompare(b.name);
-        });
-        nodes.forEach(node => {
-            if (node.type === 'folder') sortChildren(node.children);
-        });
-    }
-    sortChildren(rootChildren);
-    return rootChildren;
-}
-
-/* 确保文件夹路径存在，返回folder节点 */
-function ensureFolderPath(rootMap, folderPath, rootChildren) {
-    if (rootMap.has(folderPath)) return rootMap.get(folderPath);
-    const parts = folderPath.split('/');
-    let currentPath = "";
-    let parentChildren = rootChildren;
-    let parentNode = null;
-    
-    for (let i = 0; i < parts.length; i++) {
-        const part = parts[i];
-        const prevPath = currentPath;
-        currentPath = currentPath ? currentPath + "/" + part : part;
-        
-        if (!rootMap.has(currentPath)) {
-            const newFolderNode = {
-                type: 'folder',
-                name: part,
-                fullPath: currentPath,
-                children: [],
-                parentPath: prevPath || null
-            };
-            rootMap.set(currentPath, newFolderNode);
-            // 添加到父级children
-            if (parentChildren !== null) {
-                parentChildren.push(newFolderNode);
-            }
-        }
-        // 更新父级children引用
-        const currentNode = rootMap.get(currentPath);
-        parentChildren = currentNode.children;
-        parentNode = currentNode;
-    }
-    return parentNode;
-}
-
-/* 渲染文件树到侧边栏 (带折叠功能) */
-function renderFileTree() {
-    const treeRoots = buildTree(allFiles);
-    const container = document.getElementById("fileTreeContainer");
-    container.innerHTML = "";
-    const ul = document.createElement("ul");
-    ul.className = "tree-node";
-    renderTreeNodes(treeRoots, ul);
-    container.appendChild(ul);
-    // 高亮当前活动文件
-    if (currentActiveFile) {
-        highlightActiveFile(currentActiveFile.fullPath);
-    }
-}
-
-/* 递归渲染树节点 */
-function renderTreeNodes(nodes, parentElement) {
-    nodes.forEach(node => {
-        const li = document.createElement("li");
-        li.className = "tree-item";
-        li.dataset.path = node.fullPath || (node.type === 'file' ? node.fullPath : node.fullPath);
-        
-        const contentDiv = document.createElement("div");
-        contentDiv.className = "tree-item-content";
-        
-        if (node.type === 'folder') {
-            const isExpanded = folderState.get(node.fullPath) !== false; // 默认为展开
-            const arrowSpan = document.createElement("span");
-            arrowSpan.className = "folder-arrow " + (isExpanded ? "open" : "");
-            arrowSpan.textContent = "▶";
-            arrowSpan.style.display = "inline-block";
-            
-            const folderIcon = document.createElement("span");
-            folderIcon.className = "folder-icon";
-            folderIcon.textContent = "📁";
-            
-            const nameSpan = document.createElement("span");
-            nameSpan.className = "file-name";
-            nameSpan.textContent = node.name;
-            
-            contentDiv.appendChild(arrowSpan);
-            contentDiv.appendChild(folderIcon);
-            contentDiv.appendChild(nameSpan);
-            
-            // 点击文件夹toggle展开/折叠
-            contentDiv.addEventListener("click", (e) => {
-                e.stopPropagation();
-                toggleFolder(node.fullPath);
-            });
-            
-            li.appendChild(contentDiv);
-            
-            // 子容器
-            const childrenWrapper = document.createElement("div");
-            childrenWrapper.className = "children-wrapper " + (isExpanded ? "" : "collapsed");
-            const childUl = document.createElement("ul");
-            childUl.className = "tree-node";
-            renderTreeNodes(node.children, childUl);
-            childrenWrapper.appendChild(childUl);
-            li.appendChild(childrenWrapper);
-        } 
-        else { // 文件节点
-            const fileIcon = document.createElement("span");
-            fileIcon.className = "file-icon";
-            fileIcon.textContent = "📄";
-            const nameSpan = document.createElement("span");
-            nameSpan.className = "file-name";
-            nameSpan.textContent = node.name;
-            contentDiv.appendChild(fileIcon);
-            contentDiv.appendChild(nameSpan);
-            
-            // 文件点击打开
-            contentDiv.addEventListener("click", (e) => {
-                e.stopPropagation();
-                if (node.fileData) {
-                    openFile(node.fileData);
-                }
-            });
-            li.appendChild(contentDiv);
-        }
-        
-        parentElement.appendChild(li);
-    });
-}
-
-/* 切换文件夹折叠状态 */
-function toggleFolder(folderPath) {
-    const current = folderState.get(folderPath);
-    folderState.set(folderPath, !current);
-    // 重新渲染树，保留选中和高亮
-    renderFileTree();
-    // 恢复高亮活动文件
-    if (currentActiveFile) {
-        highlightActiveFile(currentActiveFile.fullPath);
-    }
-}
-
-/* 高亮当前选中的文件 */
-function highlightActiveFile(fullPath) {
-    // 查找所有 file-item-content 并且对应的文件fullPath匹配 (通过dataset方式间接)
-    const allItems = document.querySelectorAll(".tree-item-content");
-    allItems.forEach(item => {
-        item.classList.remove("active");
-    });
-    // 由于重绘后我们需要根据文件路径找到对应的DOM元素，采用稍后方法: 获取所有文件内容块，通过父li的dataset.path判断
-    const allLi = document.querySelectorAll(".tree-item");
-    for (let li of allLi) {
-        const contentDiv = li.querySelector(".tree-item-content");
-        if (!contentDiv) continue;
-        // 获取内部文件名及类型逻辑：检查同级文件数据
-        const fileIconSpan = contentDiv.querySelector(".file-icon");
-        if (fileIconSpan) {
-            // 是文件节点，尝试匹配当前文件
-            const fileNameSpan = contentDiv.querySelector(".file-name");
-            if (fileNameSpan && currentActiveFile && fileNameSpan.textContent === currentActiveFile.name) {
-                // 还需确保完整路径匹配，但可能有同名的不同路径文件，更精确: 使用路径比对，但渲染未存完整路径, 改用dataset精确
-                // 改进: 在渲染时给文件contentDiv添加 data-fullpath
-                if (contentDiv.dataset.fullpath === currentActiveFile.fullPath) {
-                    contentDiv.classList.add("active");
-                } else {
-                    // 以防数据集未设置，兜底：由于上面加了dataset 安全
-                }
-            }
-        }
-    }
-    // 额外增加增强: 直接在render时候为文件contentDiv存入fullpath
-    document.querySelectorAll(".tree-item-content[data-filepath]").forEach(el => {
-        if (el.dataset.filepath === currentActiveFile?.fullPath) {
-            el.classList.add("active");
+        if(n.type === "dir"){
+            enrichTree(n.children);
         }
     });
 }
 
-/* 修正渲染时给文件节点增加 data-filepath 属性，提高高亮准确性 */
-// 修改 renderTreeNodes 中的文件部分，添加data-filepath (因为上面已写，但需要重新挂载)
-// 直接将上面的文件节点生成增强:
-// 由于重新渲染调用了 renderTreeNodes, 我们在文件节点增加 data-filepath 属性
-// 为了保证代码完整，这里patch一下函数内文件节点部分:
-// 为了让代码无误，我重写renderTreeNodes中的文件分支添加fullpath data 属性。但由于上面的代码已经执行过原始定义，后面会重新执行renderFileTree，新版本将更新下面。
-// 就地重写增强: 将以上renderTreeNodes中文件部分增强。
-// 实际上我们在下面会覆盖整个函数定义，确保高亮精准
-// 重写增强函数确保文件节点高亮精准
-window.renderTreeNodes = renderTreeNodes; // 安全备份，但以下覆盖定义
-// 对原来的函数进行增强，以免影响之前逻辑
-const originalRenderTreeNodes = renderTreeNodes;
-window.renderTreeNodes = function(nodes, parentElement) {
-    nodes.forEach(node => {
-        const li = document.createElement("li");
-        li.className = "tree-item";
-        
-        const contentDiv = document.createElement("div");
-        contentDiv.className = "tree-item-content";
-        
-        if (node.type === 'folder') {
-            const isExpanded = folderState.get(node.fullPath) !== false;
-            const arrowSpan = document.createElement("span");
-            arrowSpan.className = "folder-arrow " + (isExpanded ? "open" : "");
-            arrowSpan.textContent = "▶";
-            const folderIcon = document.createElement("span");
-            folderIcon.className = "folder-icon";
-            folderIcon.textContent = "📁";
-            const nameSpan = document.createElement("span");
-            nameSpan.className = "file-name";
-            nameSpan.textContent = node.name;
-            contentDiv.appendChild(arrowSpan);
-            contentDiv.appendChild(folderIcon);
-            contentDiv.appendChild(nameSpan);
-            contentDiv.addEventListener("click", (e) => {
-                e.stopPropagation();
-                toggleFolder(node.fullPath);
-            });
-            li.appendChild(contentDiv);
-            
-            const childrenWrapper = document.createElement("div");
-            childrenWrapper.className = "children-wrapper " + (isExpanded ? "" : "collapsed");
-            const childUl = document.createElement("ul");
-            childUl.className = "tree-node";
-            window.renderTreeNodes(node.children, childUl);
-            childrenWrapper.appendChild(childUl);
-            li.appendChild(childrenWrapper);
-        } else {
-            const fileIcon = document.createElement("span");
-            fileIcon.className = "file-icon";
-            fileIcon.textContent = "📄";
-            const nameSpan = document.createElement("span");
-            nameSpan.className = "file-name";
-            nameSpan.textContent = node.name;
-            contentDiv.appendChild(fileIcon);
-            contentDiv.appendChild(nameSpan);
-            // 添加文件完整路径标识符用于高亮
-            contentDiv.setAttribute("data-filepath", node.fullPath);
-            contentDiv.addEventListener("click", (e) => {
-                e.stopPropagation();
-                if (node.fileData) {
-                    openFile(node.fileData);
-                }
-            });
-            li.appendChild(contentDiv);
-        }
-        parentElement.appendChild(li);
-    });
-};
-// 替换原函数
-renderTreeNodes = window.renderTreeNodes;
-
-// 重新执行一次完整渲染确保高亮data属性
-function reRenderTree() {
-    renderFileTree();
-}
-
-/* 过滤搜索: 基于文件名，并且重新渲染树同时保持展开所有的匹配文件夹？但为了体验，搜索时只展示匹配的文件但保留文件夹结构？这里简单实现: 搜索时重新构建临时文件列表并刷新树，并自动展开所有含匹配项的文件夹 */
-function filterFiles() {
-    const keyword = document.getElementById("searchInput").value.toLowerCase();
-    if (!keyword.trim()) {
-        // 无搜索词: 重置全部文件并恢复原有折叠状态
-        renderFileTree();
-        if (currentActiveFile) highlightActiveFile(currentActiveFile.fullPath);
-        return;
-    }
-    // 过滤文件
-    const filtered = allFiles.filter(f => f.name.toLowerCase().includes(keyword) || f.fullPath.toLowerCase().includes(keyword));
-    // 为了展示树，构建包含这些文件的树，同时为了折叠友好，将所有文件夹强制展开以便看到匹配项
-    const tempTree = buildTree(filtered);
-    // 临时渲染树但保持所有父节点展开逻辑: 自定义渲染将所有文件夹强制展开视觉效果
-    const container = document.getElementById("fileTreeContainer");
-    container.innerHTML = "";
-    const ul = document.createElement("ul");
-    ul.className = "tree-node";
-    function renderFilteredTree(nodes, parentUl) {
-        nodes.forEach(node => {
-            const li = document.createElement("li");
-            li.className = "tree-item";
-            const contentDiv = document.createElement("div");
-            contentDiv.className = "tree-item-content";
-            if (node.type === 'folder') {
-                // 搜索时自动展开所有文件夹
-                const arrowSpan = document.createElement("span");
-                arrowSpan.className = "folder-arrow open";
-                arrowSpan.textContent = "▶";
-                const folderIcon = document.createElement("span");
-                folderIcon.textContent = "📁";
-                const nameSpan = document.createElement("span");
-                nameSpan.textContent = node.name;
-                contentDiv.appendChild(arrowSpan);
-                contentDiv.appendChild(folderIcon);
-                contentDiv.appendChild(nameSpan);
-                contentDiv.addEventListener("click", (e) => {
-                    e.stopPropagation();
-                    // 搜索状态下点击暂时切换原始全局state会有冲突，暂时不做toggle 保持简单
-                });
-                li.appendChild(contentDiv);
-                const childrenWrapper = document.createElement("div");
-                childrenWrapper.className = "children-wrapper";
-                const childUl = document.createElement("ul");
-                renderFilteredTree(node.children, childUl);
-                childrenWrapper.appendChild(childUl);
-                li.appendChild(childrenWrapper);
-            } else {
-                const fileIcon = document.createElement("span");
-                fileIcon.textContent = "📄";
-                const nameSpan = document.createElement("span");
-                nameSpan.textContent = node.name;
-                contentDiv.appendChild(fileIcon);
-                contentDiv.appendChild(nameSpan);
-                contentDiv.setAttribute("data-filepath", node.fullPath);
-                contentDiv.addEventListener("click", (e) => {
-                    if (node.fileData) openFile(node.fileData);
-                });
-                li.appendChild(contentDiv);
-            }
-            parentUl.appendChild(li);
-        });
-    }
-    renderFilteredTree(tempTree, ul);
-    container.appendChild(ul);
-    if (currentActiveFile) highlightActiveFile(currentActiveFile.fullPath);
-}
-
-/* ================= 首页 ================= */
-function showHomePage() {
-    // 清除侧边栏高亮，但侧边栏保持可见
-    if (document.querySelector(".sidebar")) document.querySelector(".sidebar").style.display = "block";
-    if (document.querySelector(".resizer")) document.querySelector(".resizer").style.display = "block";
-    document.getElementById("currentFile").innerText = "Repository Overview";
-    currentText = "";
-    currentRawUrl = "";
-    currentActiveFile = null;
-    const viewer = document.getElementById("viewer");
-    viewer.innerHTML = `
-    <div class="markdown">
-        <div class="repo-list">
-            ${allFiles.map(file => `
-            <div class="repo-row" onclick="openFileByName('${file.name.replace(/'/g, "\\'")}')">
-                <div class="repo-left">
-                    <span class="repo-icon">📄</span>
-                    <span class="repo-name">${escapeHtml(file.name)}</span>
-                </div>
-                <div class="repo-right">
-                    <span>${file.type}</span>
-                    <span>${file.modified}</span>
-                    <span>${file.version}</span>
-                </div>
-            </div>
-            `).join("")}
-        </div>
-    </div>`;
-    // 清除文件高亮
-    document.querySelectorAll(".tree-item-content").forEach(el => el.classList.remove("active"));
-}
-
-/* ================= 打开文件 ================= */
-async function openFile(file) {
-    currentActiveFile = file;
-    document.querySelector(".sidebar").style.display = "block";
-    document.querySelector(".resizer").style.display = "block";
-    document.getElementById("currentFile").innerText = file.name;
-    currentRawUrl = file.download_url;
-    try {
-        const response = await fetch(file.download_url);
-        const text = await response.text();
-        currentText = text;
-        const viewer = document.getElementById("viewer");
-        if (file.name.toLowerCase().endsWith(".md")) {
-            viewer.innerHTML = `<div class="markdown">${marked.parse(text)}</div>`;
-        } else {
-            viewer.innerHTML = `
-            <div class="markdown">
-                <h2>${escapeHtml(file.name)}</h2>
-                <p>Folder: ${file.folder || '/'}</p>
-                <p>Modified: ${file.modified}</p>
-                <p>Type: ${file.type}</p>
-                <p>Version: ${file.version}</p>
-            </div>
-            <pre><code class="language-c">${escapeHtml(text)}</code></pre>`;
-            Prism.highlightAll();
-        }
-        // 高亮侧边栏当前文件
-        renderFileTree(); // 重新渲染树确保高亮
-        highlightActiveFile(file.fullPath);
-    } catch(err) {
-        document.getElementById("viewer").innerHTML = "<h2>Load Failed</h2>";
-    }
-}
-
-function openFileByName(name) {
-    const file = allFiles.find(f => f.name === name);
-    if (file) openFile(file);
-}
-
-function escapeHtml(str) {
-    return str.replace(/[&<>]/g, function(m) {
-        if (m === '&') return '&amp;';
-        if (m === '<') return '&lt;';
-        if (m === '>') return '&gt;';
-        return m;
-    });
-}
-
-function copyCode() {
-    if (!currentText) { alert("No file opened"); return; }
-    navigator.clipboard.writeText(currentText);
-    alert("Copied!");
-}
-
-function downloadFile() {
-    if (!currentRawUrl) { alert("No file opened"); return; }
-    fetch(currentRawUrl).then(r => r.blob()).then(blob => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = currentActiveFile ? currentActiveFile.name : "file";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-    });
-}
-
-function toggleTheme() {
-    document.body.classList.toggle("light");
-}
-
-/* Resizer */
-const resizer = document.getElementById("resizer");
-const sidebarEl = document.querySelector(".sidebar");
-let isResizing = false;
-resizer.addEventListener("mousedown", () => { isResizing = true; document.body.style.cursor = "col-resize"; });
-document.addEventListener("mousemove", (e) => { if(!isResizing) return; let w = e.clientX; if(w<100) w=100; if(w>900) w=900; sidebarEl.style.width = w+"px"; });
-document.addEventListener("mouseup", () => { isResizing = false; document.body.style.cursor = "default"; });
-</script>
-</body>
-</html>
+/* ================= RENDER TREE ================= */
+function renderTree
