@@ -17,7 +17,7 @@ body{
     overflow:hidden;
 }
 
-/* ================= LOGIN ================= */
+/* ===== LOGIN ===== */
 #loginPage{
     display:flex;
     justify-content:center;
@@ -36,6 +36,8 @@ body{
     margin-bottom:15px;
     background:#0d1117;
     color:white;
+    border:1px solid #30363d;
+    border-radius:6px;
 }
 .login-box button{
     width:100%;
@@ -46,8 +48,9 @@ body{
     cursor:pointer;
 }
 
-/* ================= APP ================= */
+/* ===== APP ===== */
 #app{display:none;height:100vh;flex-direction:column;}
+
 .topbar{
     height:55px;
     background:#161b22;
@@ -56,20 +59,53 @@ body{
     padding:0 15px;
     gap:15px;
 }
-.topbar .logo{font-weight:bold;}
-.topbar input{flex:1;padding:10px;background:#0d1117;color:white;border:1px solid #30363d;border-radius:6px;}
-.topbar button{padding:8px 14px;border:none;background:#21262d;color:white;border-radius:6px;cursor:pointer;}
 
-.container{display:flex;height:100%;overflow:hidden;}
-.sidebar{width:280px;background:#161b22;border-right:1px solid #30363d;overflow:auto;}
-.file-item{padding:12px;cursor:pointer;}
+.topbar .logo{font-weight:bold;}
+
+.topbar input{
+    flex:1;
+    padding:10px;
+    background:#0d1117;
+    color:white;
+    border:1px solid #30363d;
+    border-radius:6px;
+}
+
+.topbar button{
+    padding:8px 14px;
+    border:none;
+    background:#21262d;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.container{
+    display:flex;
+    height:100%;
+}
+
+.sidebar{
+    width:280px;
+    background:#161b22;
+    border-right:1px solid #30363d;
+    overflow:auto;
+}
+
+.file-item{
+    padding:12px;
+    cursor:pointer;
+}
 .file-item:hover{background:#21262d;}
 .file-item.active{background:#30363d;}
 
-.resizer{width:5px;background:#30363d;cursor:col-resize;transition:0.2s;display:block;}
-.resizer:hover{background:#58a6ff;}
+.main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
 
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
 .file-header{
     height:55px;
     background:#161b22;
@@ -79,7 +115,12 @@ body{
     align-items:center;
     padding:0 20px;
 }
-.file-actions{display:flex;gap:10px;}
+
+.file-actions{
+    display:flex;
+    gap:10px;
+}
+
 .file-actions button{
     padding:8px 12px;
     border:none;
@@ -88,10 +129,20 @@ body{
     border-radius:6px;
     cursor:pointer;
 }
-.file-actions button:hover{background:#2ea043;}
-.content{flex:1;overflow:auto;padding:20px;}
+
+.content{
+    flex:1;
+    overflow:auto;
+    padding:20px;
+}
+
+pre{
+    font-size:14px;
+    line-height:1.5;
+}
 </style>
 </head>
+
 <body>
 
 <!-- LOGIN -->
@@ -110,21 +161,20 @@ body{
     <div class="topbar">
         <div class="logo">Wang Qiang</div>
         <input id="searchInput" placeholder="Search file..." onkeyup="filterFiles()">
-        <button onclick="toggleTheme()">Theme</button>
+        <button onclick="showHomePage()">Home</button>
     </div>
 
     <div class="container">
+
         <div class="sidebar">
             <div id="fileList"></div>
         </div>
 
-        <div class="resizer" id="resizer"></div>
-
         <div class="main">
+
             <div class="file-header">
                 <div id="currentFile">Repository Overview</div>
                 <div class="file-actions">
-                    <button onclick="showHomePage()">Home</button>
                     <button onclick="copyCode()">Copy</button>
                     <button onclick="downloadFile()">Download</button>
                 </div>
@@ -133,22 +183,24 @@ body{
             <div class="content">
                 <div id="viewer"></div>
             </div>
+
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-c.min.js"></script>
 
 <script>
+
 const PASSWORD = "12345678";
 const GITHUB_USER = "WangQiang-sys";
 const REPO_NAME = "code";
 const BRANCH = "main";
 
 const files = [
-    {name:"Calculated_Irradiation_Time.c", folder:"src", type:"C Source", modified:"2026-05-28", version:"v2.3"},
-    {name:"test.h", folder:"include", type:"Header", modified:"2026-05-25", version:"v1.1"}
+    {name:"Calculated_Irradiation_Time.c", folder:"src"},
+    {name:"test.h", folder:"include"}
 ];
 
 let folderState = {};
@@ -161,21 +213,16 @@ function login(){
     if(pwd === PASSWORD){
         document.getElementById("loginPage").style.display="none";
         document.getElementById("app").style.display="flex";
-        initFiles();
+        showHomePage();
     }else{
         document.getElementById("error").innerText="Wrong Password";
     }
 }
 
-/* ================= INIT ================= */
-function initFiles(){
-    showHomePage();
-}
-
-/* ================= BUILD TREE ================= */
-function buildTree(){
+/* ================= TREE ================= */
+function buildTree(list = files){
     const map = {};
-    files.forEach(f=>{
+    list.forEach(f=>{
         if(!map[f.folder]){
             map[f.folder]={name:f.folder,type:"folder",children:[]};
         }
@@ -184,27 +231,38 @@ function buildTree(){
     return Object.values(map);
 }
 
-/* ================= RENDER TREE ================= */
+/* folder-first + file-second */
 function renderTree(tree, container){
+
     container.innerHTML="";
+
     tree.forEach(item=>{
+
         if(item.type==="folder"){
+
             const div=document.createElement("div");
             div.className="file-item";
+
             const open = folderState[item.name];
+
             div.innerHTML=open?`📂 ${item.name}`:`📁 ${item.name}`;
+
             div.onclick=()=>{
                 folderState[item.name]=!folderState[item.name];
                 showHomePage();
             };
+
             container.appendChild(div);
+
             if(open){
                 const sub=document.createElement("div");
                 sub.style.paddingLeft="18px";
                 renderTree(item.children, sub);
                 container.appendChild(sub);
             }
-        }else{
+        }
+
+        else{
             const div=document.createElement("div");
             div.className="file-item";
             div.innerHTML=`📄 ${item.name}`;
@@ -216,33 +274,86 @@ function renderTree(tree, container){
 
 /* ================= HOME ================= */
 function showHomePage(){
-    const tree = buildTree();
-    const list = document.getElementById("fileList");
-    if(!list) return;
-    renderTree(tree, list);
-    document.getElementById("currentFile").innerText = "Repository Overview";
+    const tree = buildTree(files);
+    renderTree(tree, document.getElementById("fileList"));
+
+    document.getElementById("currentFile").innerText="Repository Overview";
+    document.getElementById("viewer").innerHTML="";
     currentText="";
     currentRawUrl="";
-    document.getElementById("viewer").innerHTML="";
 }
 
 /* ================= OPEN FILE ================= */
 async function openFile(file){
+
     document.getElementById("currentFile").innerText=file.name;
-    currentRawUrl=`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${file.name}`;
-    document.getElementById("viewer").innerHTML="<h3>Loading...</h3>";
+
+    currentRawUrl=
+`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${file.folder}/${file.name}`;
+
+    document.getElementById("viewer").innerHTML="Loading...";
+
     try{
         const res=await fetch(currentRawUrl);
         const text=await res.text();
+
         currentText=text;
-        document.getElementById("viewer").innerHTML=`<pre><code>${escapeHtml(text)}</code></pre>`;
+
+        document.getElementById("viewer").innerHTML=
+`<pre><code class="language-c">${escapeHtml(text)}</code></pre>`;
+
+        Prism.highlightAll();
+
     }catch(e){
         document.getElementById("viewer").innerHTML="Load Failed";
     }
 }
 
-function escapeHtml(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function copyCode(){if(!currentText){alert("No file opened");return;}navigator.clipboard.writeText(currentText);alert("Copied!");}
-function downloadFile(){if(!currentRawUrl){alert("No file opened");return;}fetch(currentRawUrl).then(r=>r.blob()).then(b=>{const url=URL.createObjectURL(b);const a=document.createElement("a");a.href=url;a.download=document.getElementById("currentFile").innerText;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);});}
-function toggleTheme(){document.body.classList.toggle("light");}
-function filterFiles(){const key=document.getElementById("searchInput").value.toLowerCase();const filtered=files.filter(f=>f.name.toLowerCase().includes(key));const map={};filtered.forEach(f=>{if(!map[f.folder]) map[f.folder]={name:f.folder,type:"folder",children:[]}; map[f.folder].children.push(f);});renderTree(Object.values(map), document.getElementById("fileList"))
+/* ================= SEARCH ================= */
+function filterFiles(){
+
+    const key=document.getElementById("searchInput").value.toLowerCase();
+
+    const filtered=files.filter(f=>f.name.toLowerCase().includes(key));
+
+    const tree=buildTree(filtered);
+
+    renderTree(tree, document.getElementById("fileList"));
+}
+
+/* ================= COPY ================= */
+function copyCode(){
+    if(!currentText) return alert("No file opened");
+    navigator.clipboard.writeText(currentText);
+    alert("Copied!");
+}
+
+/* ================= DOWNLOAD ================= */
+function downloadFile(){
+    if(!currentRawUrl) return alert("No file opened");
+
+    fetch(currentRawUrl)
+        .then(r=>r.blob())
+        .then(blob=>{
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement("a");
+            a.href=url;
+            a.download=document.getElementById("currentFile").innerText;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        });
+}
+
+/* ================= UTIL ================= */
+function escapeHtml(t){
+    return t.replace(/&/g,"&amp;")
+            .replace(/</g,"&lt;")
+            .replace(/>/g,"&gt;");
+}
+
+</script>
+
+</body>
+</html>
