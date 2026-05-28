@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini GitHub Viewer</title>
+
+<link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet"/>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+    background:#0d1117;
+    color:#c9d1d9;
+    font-family:Consolas, monospace;
+    height:100vh;
+    overflow:hidden;
+}
+
+/* ===== LOGIN ===== */
+#loginPage{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+.login-box{
+    width:320px;
+    background:#161b22;
+    padding:40px;
+    border-radius:12px;
+}
+.login-box input{
+    width:100%;
+    padding:12px;
+    margin-bottom:15px;
+    background:#0d1117;
+    color:white;
+    border:1px solid #30363d;
+    border-radius:6px;
+}
+.login-box button{
+    width:100%;
+    padding:12px;
+    background:#238636;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+/* ===== APP ===== */
+#app{display:none;height:100vh;flex-direction:column;}
+
+.topbar{
+    height:55px;
+    background:#161b22;
+    display:flex;
+    align-items:center;
+    padding:0 15px;
+    gap:15px;
+}
+
+.topbar .logo{font-weight:bold;}
+
+.topbar input{
+    flex:1;
+    padding:10px;
+    background:#0d1117;
+    color:white;
+    border:1px solid #30363d;
+    border-radius:6px;
+}
+
+.topbar button{
+    padding:8px 14px;
+    border:none;
+    background:#21262d;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.container{
+    display:flex;
+    height:100%;
+}
+
+.sidebar{
+    width:280px;
+    background:#161b22;
+    border-right:1px solid #30363d;
+    overflow:auto;
+}
+
+.file-item{
+    padding:12px;
+    cursor:pointer;
+}
+.file-item:hover{background:#21262d;}
+.file-item.active{background:#30363d;}
+
+.main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+.file-header{
+    height:55px;
+    background:#161b22;
+    border-bottom:1px solid #30363d;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+}
+
+.file-actions{
+    display:flex;
+    gap:10px;
+}
+
+.file-actions button{
+    padding:8px 12px;
+    border:none;
+    background:#238636;
+    color:white;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.content{
+    flex:1;
+    overflow:auto;
+    padding:20px;
+}
+
+pre{
+    font-size:14px;
+    line-height:1.5;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginPage">
+    <div class="login-box">
+        <h1>Mini GitHub</h1>
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <p id="error" style="color:red;margin-top:10px;"></p>
+    </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+    <div class="topbar">
+        <div class="logo">Wang Qiang</div>
+        <input id="searchInput" placeholder="Search file..." onkeyup="filterFiles()">
+        <button onclick="showHomePage()">Home</button>
+    </div>
+
+    <div class="container">
+
+        <div class="sidebar">
+            <div id="fileList"></div>
+        </div>
+
+        <div class="main">
+
+            <div class="file-header">
+                <div id="currentFile">Repository Overview</div>
+                <div class="file-actions">
+                    <button onclick="copyCode()">Copy</button>
+                    <button onclick="downloadFile()">Download</button>
+                </div>
+            </div>
+
+            <div class="content">
+                <div id="viewer"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-c.min.js"></script>
+
+<script>
+
+const PASSWORD = "12345678";
+const GITHUB_USER = "WangQiang-sys";
+const REPO_NAME = "code";
+const BRANCH = "main";
+
+const files = [
+    {name:"Calculated_Irradiation_Time.c", folder:""},
+    {name:"test.h", folder:"include"}
+];
+
+let folderState = {};
+let currentText = "";
+let currentRawUrl = "";
+
+/* ================= LOGIN ================= */
+function login(){
+    const pwd = document.getElementById("password").value;
+    if(pwd === PASSWORD){
+        document.getElementById("loginPage").style.display="none";
+        document.getElementById("app").style.display="flex";
+        showHomePage();
+    }else{
+        document.getElementById("error").innerText="Wrong Password";
+    }
+}
+
+/* ================= TREE ================= */
+function buildTree(list = files){
+    const map = {};
+    list.forEach(f=>{
+        if(!map[f.folder]){
+            map[f.folder]={name:f.folder,type:"folder",children:[]};
+        }
+        map[f.folder].children.push(f);
+    });
+    return Object.values(map);
+}
+
+/* folder-first + file-second */
+function renderTree(tree, container){
+
+    container.innerHTML="";
+
+    tree.forEach(item=>{
+
+        if(item.type==="folder"){
+
+            const div=document.createElement("div");
+            div.className="file-item";
+
+            const open = folderState[item.name];
+
+            div.innerHTML=open?`📂 ${item.name}`:`📁 ${item.name}`;
+
+            div.onclick=()=>{
+                folderState[item.name]=!folderState[item.name];
+                showHomePage();
+            };
+
+            container.appendChild(div);
+
+            if(open){
+                const sub=document.createElement("div");
+                sub.style.paddingLeft="18px";
+                renderTree(item.children, sub);
+                container.appendChild(sub);
+            }
+        }
+
+        else{
+            const div=document.createElement("div");
+            div.className="file-item";
+            div.innerHTML=`📄 ${item.name}`;
+            div.onclick=()=>openFile(item);
+            container.appendChild(div);
+        }
+    });
+}
+
+/* ================= HOME ================= */
+function showHomePage(){
+    const tree = buildTree(files);
+    renderTree(tree, document.getElementById("fileList"));
+
+    document.getElementById("currentFile").innerText="Repository Overview";
+    document.getElementById("viewer").innerHTML="";
+    currentText="";
+    currentRawUrl="";
+}
+
+/* ================= OPEN FILE ================= */
+async function openFile(file){
+
+    document.getElementById("currentFile").innerText=file.name;
+
+    currentRawUrl=
+`https://raw.githubusercontent.com/${GITHUB_USER}/${REPO_NAME}/${BRANCH}/${file.folder}/${file.name}`;
+
+    document.getElementById("viewer").innerHTML="Loading...";
+
+    try{
+        const res=await fetch(currentRawUrl);
+        const text=await res.text();
+
+        currentText=text;
+
+        document.getElementById("viewer").innerHTML=
+`<pre><code class="language-c">${escapeHtml(text)}</code></pre>`;
+
+        Prism.highlightAll();
+
+    }catch(e){
+        document.getElementById("viewer").innerHTML="Load Failed";
+    }
+}
+
+/* ================= SEARCH ================= */
+function filterFiles(){
+
+    const key=document.getElementById("searchInput").value.toLowerCase();
+
+    const filtered=files.filter(f=>f.name.toLowerCase().includes(key));
+
+    const tree=buildTree(filtered);
+
+    renderTree(tree, document.getElementById("fileList"));
+}
+
+/* ================= COPY ================= */
+function copyCode(){
+    if(!currentText) return alert("No file opened");
+    navigator.clipboard.writeText(currentText);
+    alert("Copied!");
+}
+
+/* ================= DOWNLOAD ================= */
+function downloadFile(){
+    if(!currentRawUrl) return alert("No file opened");
+
+    fetch(currentRawUrl)
+        .then(r=>r.blob())
+        .then(blob=>{
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement("a");
+            a.href=url;
+            a.download=document.getElementById("currentFile").innerText;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        });
+}
+
+/* ================= UTIL ================= */
+function escapeHtml(t){
+    return t.replace(/&/g,"&amp;")
+            .replace(/</g,"&lt;")
+            .replace(/>/g,"&gt;");
+}
+
+</script>
+
+</body>
+</html>
